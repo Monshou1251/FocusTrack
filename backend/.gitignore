@@ -1,0 +1,9 @@
+# Ignore sensitive files
+.env
+config.js
+
+# Ignore build artifacts
+node_modules/
+dist/
+build/
+config/
