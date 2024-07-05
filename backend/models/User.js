@@ -1,6 +1,7 @@
 const Mongoose = require("mongoose")
+const Schema = Mongoose.Schema
 
-const UserSchema = new Mongoose.Schema({
+const UserSchema = new Schema({
     username: {
         type: String,
         unique: true, 
@@ -21,6 +22,20 @@ const UserSchema = new Mongoose.Schema({
        type: String,
        default: "Basic",
        required: true, 
+    },
+    profile: {
+        photo: {
+          type: String,
+          default: null,
+        },
+        additionalInfo: {
+          type: Map,
+          of: String,
+        },
+      },
+    createdAt: {
+    type: Date,
+    default: Date.now,
     },
 })
 

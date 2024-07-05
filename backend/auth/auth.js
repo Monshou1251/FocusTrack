@@ -51,7 +51,6 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const { username, password } = req.body;
-
   // Validate input
   if (!username || !password) {
     return res.status(400).json({

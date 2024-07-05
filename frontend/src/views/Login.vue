@@ -1,36 +1,56 @@
 <template>
   <Navbar />
   <div class="container">
-    <div class="text-container">
-      <h1 class="text">FocusTrack</h1>
-    </div>
-    <div class="input-main">
-      <!-- <form> -->
-      <div class="form-group">
-        <svg-icon v-if="!username" type="mdi" :path="mdiAt"></svg-icon>
-        <input
-          type="text"
-          name="username"
-          v-model="username"
-          class="form-control"
-          placeholder="username"
-        />
+    <div class="container-wrapper">
+      <div class="text-container">
+        <h1 class="text">FocusTrack</h1>
       </div>
-      <div class="form-group">
-        <svg-icon v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
-        <input
-          type="password"
-          name="password"
-          v-model="password"
-          class="form-control"
-          placeholder="password"
-        />
+      <div class="input-main">
+        <div>
+          <div class="form-group">
+            <svg-icon class="input-icons" v-if="!username" type="mdi" :path="mdiAccount "></svg-icon>
+            <input
+              type="text"
+              name="username"
+              v-model="username"
+              class="form-control"
+              placeholder="username"
+            />
+          </div>
+          <div class="form-group">
+            <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
+            <input
+              type="password"
+              name="password"
+              v-model="password"
+              class="form-control"
+              placeholder="password"
+            />
+          </div>
+          <div class="form-group">
+            <svg-icon class="input-icons email-icon" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
+            <input
+              type="email"
+              name="email"
+              v-model="email"
+              class="form-control email-input"
+              placeholder="email"
+            />
+          </div>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="button-signin" @click="signIn">Sign in</button>
+          <button type="submit" class="button-signup" @click="signIn">Sign up</button>
+        </div>
+        <div class="google-git-icons">
+          <div class="google-git-icons-item" title="Login with Google">
+            <svg-icon type="mdi" :path="mdiGoogle"></svg-icon>
+          </div>
+          <div class="google-git-icons-item" title="Login with Github">
+            <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
+          </div>
+        </div>
       </div>
-      <div class="button-group">
-        <button type="submit" class="button-signin">Sign in</button>
-        <button type="submit" class="button-signup">Sign up</button>
-      </div>
-      <!-- </form> -->
     </div>
   </div>
 </template>
@@ -39,11 +59,35 @@
 import Navbar from '@/components/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
-import { mdiAt, mdiKeyVariant } from '@mdi/js'
+import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub, mdiAccount  } from '@mdi/js'
 import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const username = ref()
 const password = ref()
+const email = ref()
+
+const signIn = async() => {
+  try {
+    const response = await axios.post('/api/auth/login', {
+      username: username.value,
+      password: password.value,
+    })
+
+    if (response.status == 200) {
+      router.push({name: 'home'})
+    } else {
+      console.log('Unpredicted code:', response.status)
+    }
+
+  } catch(error) {
+    // console.log('Error occured:', error)
+    console.log('Error occured:', error.response.data.message)
+  }
+}
 
 document.addEventListener('mousemove', function (e) {
   const gradientText = document.querySelector('.text')
@@ -54,6 +98,7 @@ document.addEventListener('mousemove', function (e) {
 </script>
 
 <style scoped>
+
 .container {
   display: flex;
   justify-content: center;
@@ -63,21 +108,31 @@ document.addEventListener('mousemove', function (e) {
   width: 100%;
 }
 
+.container-wrapper {
+  padding: 30px;
+  margin-bottom: 20%;
+  /* border: solid 1px var(--color-border); */
+  border-radius: 10px;
+  border-color: transparent; /* Start with transparent border */
+  /* animation: borderFadeIn 4s ease forwards 6s; */
+}
+
 .text-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 20%;
   cursor: default;
+  padding-bottom: 15px;
 }
 
 .text {
-  font-size: 48px;
+  /* font-size: 48px; */
+  font-size: 38px;
   font-weight: 800;
-  opacity: 0;
-  animation:
+  /* opacity: 0; */
+  /* animation:
     fadeIn 4s ease forwards 1s,
-    moveAndResize 1s ease forwards 5s;
+    moveAndResize 1s ease forwards 5s; */
   background-image: linear-gradient(
     to right,
     orange,
@@ -95,10 +150,9 @@ document.addEventListener('mousemove', function (e) {
 .input-main {
   position: relative;
   font-size: 18px;
-  animation: fadeIn 4s ease forwards 6s;
-  opacity: 0;
-  margin-bottom: 20%;
-  transform: translateY(-90px);
+  /* animation: fadeIn 4s ease forwards 6s; */
+  /* opacity: 0; */
+  /* margin-bottom: 20%; */
 }
 
 .form-group {
@@ -115,13 +169,14 @@ document.addEventListener('mousemove', function (e) {
   box-shadow: none;
 }
 
+
 input {
   border-style: solid;
   display: inline-block;
   text-indent: 10px;
 }
 
-svg {
+.input-icons {
   position: absolute;
   display: inline-block;
   color: #2c3e5061;
@@ -130,8 +185,18 @@ svg {
   margin-left: 7px;
 }
 
+.email-input {
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+}
+
+.email-icon {
+  color: var(--color-text);
+  opacity: 0.4;
+}
+
 input::placeholder {
-  color: #2c3e5090;
+  /* color: #2c3e5090; */
   font-size: 18px;
   font-family: 'Jost';
   padding-left: 23px;
@@ -144,8 +209,6 @@ input:-webkit-autofill {
 
 .form-control:focus {
   outline: 1px solid #2b414149;
-  /* border: 2px solid #BDC3C7; */
-  /* box-shadow: 0 0 5px #2595be22; */
 }
 
 .form-group:focus-within svg {
@@ -165,10 +228,11 @@ input:-webkit-autofill {
 .button-group {
   display: flex;
   justify-content: space-between;
+  padding-top: 10px;
 }
 
 .button-signin {
-  border: solid 4px var(--color-border);
+  border: solid 2px var(--color-border);
   background-color: var(--color-background-mute);
 }
 
@@ -196,6 +260,40 @@ button:hover {
   color: var(--vt-c-text-dark-1);
 }
 
+.google-git-icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 26px;
+  gap: 25px;
+  scale: 1.4;
+}
+
+.google-git-icons-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+  
+}
+
+.google-git-icons-item:hover {
+  background-color: var(--color-background-mute);
+  cursor: pointer;
+  transition: background-color  0.2s ease-in-out, opacity  0.2s ease-in-out;
+  opacity: 1;
+}
+
+.google-git-icons-item[title]:hover::after {
+  /* content: attr(title +); */
+  border-radius: 10%;
+}
+
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -205,16 +303,22 @@ button:hover {
   }
 }
 
+@keyframes borderFadeIn {
+  from {
+    border-color: transparent;
+  }
+  to {
+    border-color: var(--color-border);
+  }
+}
+
 @keyframes moveAndResize {
   0% {
-    /* transform: translate(0, 0); */
     transform: translateY(0);
     font-size: 48px;
     font-weight: 800;
   }
   100% {
-    /* transform: translate(-50px, -100px); */
-    transform: translateY(-100px);
     font-size: 32px;
     font-weight: 600;
   }
