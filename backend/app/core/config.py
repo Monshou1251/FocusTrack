@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     EMAIL_USERNAME: str
     EMAIL_PASSWORD: str
     EMAIL_FROM: str
+    CLIENT_ID: str
+    CLIENT_SECRET: str
 
     class Config:
         env_file = ".env"  # Loads values from a .env file
