@@ -44,7 +44,7 @@
         </div>
         <div class="google-git-icons">
           <div class="google-git-icons-item" title="Login with Google">
-            <svg-icon type="mdi" :path="mdiGoogle"></svg-icon>
+            <svg-icon type="mdi" :path="mdiGoogle" @click="googleSignIn"></svg-icon>
           </div>
           <div class="google-git-icons-item" title="Login with Github">
             <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
@@ -66,9 +66,9 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const username = ref()
-const password = ref()
-const email = ref()
+const username = ref("")
+const password = ref("")
+const email = ref("")
 
 const signIn = async() => {
   try {
@@ -87,6 +87,10 @@ const signIn = async() => {
     // console.log('Error occured:', error)
     console.log('Error occured:', error.response.data.message)
   }
+}
+
+const googleSignIn = () => {
+  router.push({ path: "/api/auth/google-auth"})
 }
 
 document.addEventListener('mousemove', function (e) {
