@@ -1,0 +1,13 @@
+from datetime import timedelta
+from typing import Protocol
+
+
+class PasswordHasher(Protocol):
+    def hash(self, password: str) -> str: ...
+    def verify(self, plain_password: str, hashed_password) -> bool: ...
+    
+    
+class TokenService(Protocol):
+    def create_token(self, data: dict, expires_delta: timedelta | None = None) -> str: ...
+    def verify_token(self, token: str) -> dict | None: ...
+    

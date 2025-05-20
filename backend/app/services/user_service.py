@@ -5,13 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models.user import User, OAuthAccount
 from app.schemas.auth import UserAuthForm
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.interfaces import PasswordHasher, TokenService
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login') 
 
 
-async def register_user(form_data, db):
+async def register_user(
+    form_data: UserAuthForm,
+    db: AsyncSession,
+    hasher: PasswordHasher
+):
     email = form_data.email
     password = form_data.password
     result = await db.execute(select(User).filter(User.email == email))
@@ -20,7 +24,7 @@ async def register_user(form_data, db):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed_password = hash_password(password)
+    hashed_password = hasher.hash(password)
     user = User(email=email, hashed_password=hashed_password)
     
     db.add(user)
@@ -30,35 +34,20 @@ async def register_user(form_data, db):
     return {"msg": "User created successfully."}
 
 
-# async def authenticate_user(email: str, password: str, db: AsyncSession):
-async def authenticate_user(form_data: UserAuthForm, db: AsyncSession):
-    
-    print(form_data.password)
-    check_user_exist = await db.execute(select(User).filter(User.email == form_data.email))
-    user = check_user_exist.scalar()
-    
-    if not user or user.hashed_password is None:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
-    if not verify_password(form_data.password, 
-user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+async def authenticate_user(
+    form_data: UserAuthForm,
+    db: AsyncSession,
+    hasher: PasswordHasher,
+    token_service: TokenService
+):
+    result = await db.execute(select(User).filter(User.email == form_data.email))
+    user = result.scalar()
 
+    if not user or not hasher.verify(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
 
-    return {"create_access_token": "Good job mista!"}
-
-    # result = await db.execute(select(User).filter(User.email == email))
-    # user = result.scalars().first()
-    #
-    # if not user:
-    #     raise HTTPException(status_code=401, detail="Incorrect email or password")
-    #
-    # if not verify_password(password, user.hashed_password):
-    #     raise HTTPException(status_code=401, detail="Incorrect email or password")
-    #
-    # access_token = create_access_token({"sub": user.email})
-    # 
-    # return {"access_token": access_token, "token_type": "bearer"}
+    token = token_service.create_token({"sub": user.email})
+    return {"access_token": token, "token_type": "bearer"}
 
 
 async def register_oauth_user(provider: str, provider_id: str, email: str, db: AsyncSession):
