@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/register")
 async def register(
-    form_data: Annotated[UserAuthForm, Depends()],
+    form_data: Annotated[UserAuthForm, Depends(UserAuthForm.as_form)],
     db: AsyncSession = Depends(get_db),
     hasher: PasswordHasher = Depends(get_password_hasher),
 ):
@@ -22,9 +22,9 @@ async def register(
 
 @router.post("/login")
 async def login(
-        form_data: Annotated[UserAuthForm, Depends()],
-        db: AsyncSession = Depends(get_db),
-        hasher: PasswordHasher = Depends(get_password_hasher),
-        token_service: TokenService = Depends(get_token_service),
+    form_data: Annotated[UserAuthForm, Depends(UserAuthForm.as_form)],
+    db: AsyncSession = Depends(get_db),
+    hasher: PasswordHasher = Depends(get_password_hasher),
+    token_service: TokenService = Depends(get_token_service),
 ):
     return await authenticate_user(form_data, db, hasher, token_service)

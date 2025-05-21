@@ -10,7 +10,7 @@ backend/.env
 
 # Ignore logs
 *.log
-.README_DEV.md
+# .README_DEV.md
 
 # Ignore databases
 *.sqlite3

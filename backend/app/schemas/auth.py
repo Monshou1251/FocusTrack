@@ -1,7 +1,14 @@
-from fastapi import Form
 from pydantic import BaseModel, EmailStr
+from fastapi import Form
 
-class UserAuthForm:
-    def __init__(self, email: EmailStr, password: str):
-        self.email = email
-        self.password = password
+class UserAuthForm(BaseModel):
+    email: EmailStr
+    password: str
+
+    @classmethod
+    def as_form(
+        cls,
+        email: EmailStr = Form(...),
+        password: str = Form(...)
+    ) -> "UserAuthForm":
+        return cls(email=email, password=password)
