@@ -18,14 +18,14 @@ class UserAuthForm(BaseModel):
 class OAuth2EmailRequestForm(OAuth2PasswordRequestForm):
     def __init__(
         self,
-        email: str = Form(..., alias="username"),
+        username: str = Form(..., alias="username"),
         password: str = Form(...),
         scope: str = Form(""),
         client_id: str = Form(None),
         client_secret: str = Form(None),
     ):
         super().__init__(
-            username=email,
+            username=username,
             password=password,
             scope=scope,
             client_id=client_id,

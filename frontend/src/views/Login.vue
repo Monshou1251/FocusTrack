@@ -8,13 +8,13 @@
       <div class="input-main">
         <div>
           <div class="form-group">
-            <svg-icon class="input-icons" v-if="!username" type="mdi" :path="mdiAccount "></svg-icon>
+            <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
             <input
-              type="text"
-              name="username"
-              v-model="username"
+              type="email"
+              name="email"
+              v-model="email"
               class="form-control"
-              placeholder="username"
+              placeholder="email"
             />
           </div>
           <div class="form-group">
@@ -27,20 +27,10 @@
               placeholder="password"
             />
           </div>
-          <div class="form-group">
-            <svg-icon class="input-icons email-icon" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
-            <input
-              type="email"
-              name="email"
-              v-model="email"
-              class="form-control email-input"
-              placeholder="email"
-            />
-          </div>
         </div>
         <div class="button-group">
           <button type="submit" class="button-signin" @click="signIn">Sign in</button>
-          <button type="submit" class="button-signup" @click="signIn">Sign up</button>
+          <button type="submit" class="button-signup" @click="signUp">Sign up</button>
         </div>
         <div class="google-git-icons">
           <div class="google-git-icons-item" title="Login with Google">
@@ -59,21 +49,41 @@
 import Navbar from '@/components/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
-import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub, mdiAccount  } from '@mdi/js'
+import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub} from '@mdi/js'
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const username = ref("")
-const password = ref("")
 const email = ref("")
+const password = ref("")
 
-const signIn = async() => {
+const signIn = async () => {
   try {
-    const response = await axios.post('/api/auth/login', {
-      username: username.value,
+    const form = new FormData()
+    form.append('username', email.value)
+    form.append('password', password.value)
+
+    const response = await axios.post('/api/auth/login', form)
+
+    if (response.status == 200) {
+      alert("✅ Успешный вход!");
+      // router.push({ name: 'home' })
+    } else {
+      console.log('Unexpected code:', response.status)
+    }
+
+  } catch (error) {
+    console.log('Error occurred:', error.response?.data?.detail ?? error)
+  }
+}
+
+
+const signUp = async () => {
+  try {
+    const response = await axios.post('/api/auth/register', {
+      username: email.value,
       password: password.value,
     })
 

@@ -40,6 +40,7 @@ async def authenticate_user(
     hasher: PasswordHasher,
     token_service: TokenService
 ):
+    print(form_data)
     result = await db.execute(select(User).filter(User.email == form_data.email))
     user = result.scalars().first()
 
