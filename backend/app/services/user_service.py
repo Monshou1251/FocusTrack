@@ -55,36 +55,38 @@ async def authenticate_user(
     return {"access_token": token, "token_type": "bearer"}
 
 
-async def register_oauth_user(provider: str, provider_id: str, email: str, db: AsyncSession):
-    result = await db.execute(select(User).filter(User.email == email))
+async def google_authenticate(payload: str, provider_id: str, email: str, db: AsyncSession):
+    print("payload")
+    print(payload)
+    # result = await db.execute(select(User).filter(User.email == email))
 
-    existing_user = result.scalars().first()
+    # existing_user = result.scalars().first()
 
-    if existing_user:
-        oauth_result = await db.execute(select(OAuthAccount).filter(
-            OAuthAccount.provider == provider, OAuthAccount.user_id == existing_user.id
-        ))
-        oauth_account = oauth_result.scalars().first()
+    # if existing_user:
+    #     oauth_result = await db.execute(select(OAuthAccount).filter(
+    #         OAuthAccount.provider == provider, OAuthAccount.user_id == existing_user.id
+    #     ))
+    #     oauth_account = oauth_result.scalars().first()
 
-        if oauth_account:
-            return {"msg": "User already registerd with this OAuth provider"}
+    #     if oauth_account:
+    #         return {"msg": "User already registerd with this OAuth provider"}
 
-        oauth_account = OAuthAccount(provider=provider, provider_id=provider_id, user_id=existing_user.id)
-        db.add(oauth_account)
-        await db.commit()
+    #     oauth_account = OAuthAccount(provider=provider, provider_id=provider_id, user_id=existing_user.id)
+    #     db.add(oauth_account)
+    #     await db.commit()
 
-        return {"msg": "OAuth account linked to existing user."}
+    #     return {"msg": "OAuth account linked to existing user."}
 
-    user = User(email=email, is_verified=True)
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+    # user = User(email=email, is_verified=True)
+    # db.add(user)
+    # await db.commit()
+    # await db.refresh(user)
 
-    oauth_account = OAuthAccount(provider=provider, provider_id=provider_id, user_id=user.id)
-    db.add(oauth_account)
-    await db.commit()
+    # oauth_account = OAuthAccount(provider=provider, provider_id=provider_id, user_id=user.id)
+    # db.add(oauth_account)
+    # await db.commit()
 
-    return {"msg": "User registered via OAuth."}
+    # return {"msg": "User registered via OAuth."}
 
 
 async def get_current_user(token):

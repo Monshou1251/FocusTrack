@@ -34,7 +34,7 @@
         </div>
         <div class="google-git-icons">
           <div class="google-git-icons-item" title="Login with Google">
-            <svg-icon type="mdi" :path="mdiGoogle" @click="googleSignIn"></svg-icon>
+            <svg-icon type="mdi" :path="mdiGoogle" @click="handleGoogleLogin"></svg-icon>
           </div>
           <div class="google-git-icons-item" title="Login with Github">
             <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
@@ -50,9 +50,10 @@ import Navbar from '@/components/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
 import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub} from '@mdi/js'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
+import { GoogleOAuthProvider } from 'google-oauth-gsi';
 
 const router = useRouter();
 
@@ -99,9 +100,17 @@ const signUp = async () => {
   }
 }
 
-const googleSignIn = () => {
-  router.push({ path: "/api/auth/google-auth"})
-}
+const googleProvider = new GoogleOAuthProvider({
+    clientId: "107837184301-fascjn9elhupdsdasvjd87iqjangdrt4.apps.googleusercontent.com",
+    onScriptLoadError: () => console.log('onScriptLoadError'),
+    onScriptLoadSuccess: () => console.log('onScriptLoadSuccess'),
+});
+
+const handleGoogleLogin = googleProvider.useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: (res) => console.log('Logged in with google', res),
+    onError: (err) => console.error('Failed to login with google', err),
+});
 
 document.addEventListener('mousemove', function (e) {
   const gradientText = document.querySelector('.text')

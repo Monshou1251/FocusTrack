@@ -7,6 +7,10 @@ app = FastAPI()
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 
+origins = [
+    "http://localhost:5173",
+    # "https://your-production-site.com",
+]
 
 app.add_middleware(
     CORSMiddleware,
