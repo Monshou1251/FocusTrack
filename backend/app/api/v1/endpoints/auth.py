@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, Request
-from app.core.oauth import oauth
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.db.models.user import User
 from app.schemas.auth import UserAuthForm, OAuth2EmailRequestForm
-from app.services.user_service import register_user, authenticate_user, google_authenticate
+from app.services.user_service import register_user, authenticate_user
+from app.services.google_auth_service import google_authenticate
 from app.core.dependencies import get_password_hasher, get_token_service
 from app.core.interfaces import PasswordHasher, TokenService
 from app.core.security import get_current_user
@@ -33,7 +33,7 @@ async def login(
     return await authenticate_user(form_data, db, hasher, token_service)
 
 
-@router.post("/auth/google")
+@router.post("/google_auth")
 async def auth_google(
     payload: dict,
     db: AsyncSession = Depends(get_db),

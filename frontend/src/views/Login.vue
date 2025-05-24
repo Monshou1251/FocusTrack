@@ -50,7 +50,7 @@ import Navbar from '@/components/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
 import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub} from '@mdi/js'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
 import { GoogleOAuthProvider } from 'google-oauth-gsi';
@@ -108,7 +108,14 @@ const googleProvider = new GoogleOAuthProvider({
 
 const handleGoogleLogin = googleProvider.useGoogleLogin({
     flow: 'auth-code',
-    onSuccess: (res) => console.log('Logged in with google', res),
+    onSuccess: (res) => {
+      console.log('Logged in with google', res)
+      try {
+        axios.post('/api/auth/google_auth', res)
+      } catch (e) {
+        console.log(e)
+      }
+    },
     onError: (err) => console.error('Failed to login with google', err),
 });
 
