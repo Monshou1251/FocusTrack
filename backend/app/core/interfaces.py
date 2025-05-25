@@ -11,3 +11,13 @@ class TokenService(Protocol):
     def create_token(self, data: dict, expires_delta: timedelta | None = None) -> str: ...
     def verify_token(self, token: str) -> dict | None: ...
     
+
+class OAuthProvider(Protocol):
+    async def exchange_code_for_token(self, code: str) -> dict:
+        ...
+        
+    async def get_user_info(self, access_token: str) -> dict:
+        ...
+    
+    
+    

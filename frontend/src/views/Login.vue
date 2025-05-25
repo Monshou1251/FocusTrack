@@ -83,13 +83,14 @@ const signIn = async () => {
 
 const signUp = async () => {
   try {
-    const response = await axios.post('/api/auth/register', {
-      username: email.value,
-      password: password.value,
-    })
+    const form = new FormData()
+    form.append('username', email.value)
+    form.append('password', password.value)
+
+    const response = await axios.post('/api/auth/register', form)
 
     if (response.status == 200) {
-      router.push({name: 'home'})
+      alert("✅ Успешная регистрация!");
     } else {
       console.log('Unpredicted code:', response.status)
     }

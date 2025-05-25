@@ -4,15 +4,15 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models.user import User, OAuthAccount
-from app.schemas.auth import UserAuthForm, OAuth2EmailRequestForm
-from app.core.interfaces import PasswordHasher, TokenService
+from app.schemas.auth import OAuth2EmailRequestForm
+from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login') 
 
 
 async def register_user(
-    form_data: UserAuthForm,
+    form_data: OAuth2EmailRequestForm,
     db: AsyncSession,
     hasher: PasswordHasher
 ):
@@ -55,9 +55,27 @@ async def authenticate_user(
     return {"access_token": token, "token_type": "bearer"}
 
 
-async def google_authenticate(payload: str, db: AsyncSession, token_service: TokenService):
-    print("payload")
-    print(payload)
+async def oauth_login(
+    code: str,
+    db: AsyncSession,
+    oauth_provider: OAuthProvider,
+    token_service: TokenService
+):
+    token_data = await oauth_provider.exchange_code_for_token(code)
+    access_token = token_data["access_token"]
+    user_info = await oauth_provider.get_user_info(access_token)
+    print('#'* 10)
+    print("user_info")
+    print(user_info)
+    print('#'* 10)
+    # TODO: логика создания/поиска пользователя по email
+    # user = await get_or_create_user(user_info, db)
+
+    # Для примера:
+    token = token_service.create_token({"sub": user_info["email"]})
+    print("token from services/auth_service")
+    print(token)
+    return {"access_token": token, "token_type": "bearer"}
 
 
 async def get_current_user(token):

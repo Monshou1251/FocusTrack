@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
-from app.services.user_service import register_user, authenticate_user
+from app.services.auth_service import register_user, authenticate_user
 from app.schemas.user import UserCreate
 from app.schemas.auth import UserAuthForm
 from app.db.models.user import User
