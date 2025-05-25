@@ -25,7 +25,7 @@ FocusTrack is a personal productivity app that helps users manage their time eff
 - PostgreSQL
 - Redis
 - RabbitMQ
-- Docker (optional for containerized deployment)
+- Docker
 
 ### Backend Setup
 ```bash
