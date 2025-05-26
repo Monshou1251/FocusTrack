@@ -1,6 +1,11 @@
-from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider
+from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
 from app.core.security import BcryptHasher, JWTTokenService
-from app.infrastructure.oauth_providers.google_provider import GoogleOAuthProvider
+from app.infrastructure.auth_providers.google_provider import GoogleOAuthProvider
+from app.infrastructure.auth_providers.sqlalchemy_user_provider import SQLAlchemyUserRepository
+from app.db.session import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
+
 
 
 def get_password_hasher() -> PasswordHasher:
@@ -11,3 +16,8 @@ def get_token_service() -> TokenService:
 
 def get_google_provider() -> OAuthProvider:
     return GoogleOAuthProvider()
+
+def get_user_repository(
+    db: AsyncSession = Depends(get_db)    
+) -> UserRepository:
+    return SQLAlchemyUserRepository(db)

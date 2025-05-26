@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Protocol
+from app.db.models.user import User
 
 
 class PasswordHasher(Protocol):
@@ -10,7 +11,12 @@ class PasswordHasher(Protocol):
 class TokenService(Protocol):
     def create_token(self, data: dict, expires_delta: timedelta | None = None) -> str: ...
     def verify_token(self, token: str) -> dict | None: ...
-    
+
+
+class UserRepository(Protocol):
+    async def get_by_email(self, email: str) -> User | None: ...
+    async def exists_by_email(self, email: str) -> bool: ...
+    async def create_user(self, email: str, hashed_password: str) -> User: ...
 
 class OAuthProvider(Protocol):
     async def exchange_code_for_token(self, code: str) -> dict:

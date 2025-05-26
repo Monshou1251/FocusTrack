@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models.user import User, OAuthAccount
 from app.schemas.auth import OAuth2EmailRequestForm
-from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider
+from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login') 
@@ -13,36 +13,28 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 async def register_user(
     form_data: OAuth2EmailRequestForm,
-    db: AsyncSession,
+    user_repo: UserRepository,
     hasher: PasswordHasher
 ):
     email = form_data.email
     password = form_data.password
-    result = await db.execute(select(User).filter(User.email == email))
-    existing_user = result.scalars().first()
-
-    if existing_user:
+    
+    if await user_repo.exists_by_email(email):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = hasher.hash(password)
-    user = User(email=email, hashed_password=hashed_password)
-    
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+    await user_repo.create_user(email, hashed_password)
 
     return {"msg": "User created successfully."}
 
 
 async def authenticate_user(
     form_data: OAuth2EmailRequestForm,
-    db: AsyncSession,
+    user_repo: UserRepository,
     hasher: PasswordHasher,
     token_service: TokenService
 ):
-    print(form_data)
-    result = await db.execute(select(User).filter(User.email == form_data.email))
-    user = result.scalars().first()
+    user = await user_repo.get_by_email(form_data.email)
 
     if not user or not hasher.verify(form_data.password, user.hashed_password):
         raise HTTPException(
