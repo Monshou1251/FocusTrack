@@ -83,23 +83,30 @@ const signIn = async () => {
 
 const signUp = async () => {
   try {
-    const form = new FormData()
-    form.append('username', email.value)
-    form.append('password', password.value)
+    const form = new FormData();
+    form.append('username', email.value);
+    form.append('password', password.value);
 
-    const response = await axios.post('/api/auth/register', form)
+    const response = await axios.post('/api/auth/register', form);
+    const data = response.data;
 
-    if (response.status == 200) {
+    if (data.success) {
       alert("✅ Успешная регистрация!");
     } else {
-      console.log('Unpredicted code:', response.status)
+      alert("❌ Ошибка: " + (data.error || "Неизвестная ошибка"));
     }
 
   } catch(error) {
-    // console.log('Error occured:', error)
-    console.log('Error occured:', error.response.data.message)
+    // Ошибка HTTP или сети
+    if (error.response && error.response.data && error.response.data.detail) {
+      alert("❌ Ошибка: " + error.response.data.detail);
+    } else {
+      alert("❌ Ошибка: " + error.message);
+    }
+    console.error('Error occured:', error);
   }
 }
+
 
 const googleProvider = new GoogleOAuthProvider({
     clientId: "107837184301-fascjn9elhupdsdasvjd87iqjangdrt4.apps.googleusercontent.com",
@@ -108,17 +115,24 @@ const googleProvider = new GoogleOAuthProvider({
 });
 
 const handleGoogleLogin = googleProvider.useGoogleLogin({
-    flow: 'auth-code',
-    onSuccess: (res) => {
-      console.log('Logged in with google', res)
-      try {
-        axios.post('/api/auth/google_auth', res)
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    onError: (err) => console.error('Failed to login with google', err),
+  flow: 'auth-code',
+  onSuccess: async (res) => {
+    console.log('Logged in with Google', res);
+    try {
+      const response = await axios.post('/api/auth/google_auth', res);
+      console.log('✅ Auth success:', response.data);
+      alert('✅ Успешный вход через Google!');
+    } catch (e) {
+      console.error('❌ Auth error:', e);
+      alert('❌ Ошибка при входе через Google.');
+    }
+  },
+  onError: (err) => {
+    console.error('❌ Failed to login with Google:', err);
+    alert('❌ Ошибка: не удалось авторизоваться через Google.');
+  },
 });
+
 
 document.addEventListener('mousemove', function (e) {
   const gradientText = document.querySelector('.text')

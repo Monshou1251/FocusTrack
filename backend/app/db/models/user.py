@@ -11,6 +11,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=True)
     email = Column(String, unique=True, nullable=False)
     hashed_password: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    auth_provider = Column(String, default="email", nullable=False)
 
     oauth_accounts = relationship("OAuthAccount", back_populates="user", cascade="all, delete-orphan")
 

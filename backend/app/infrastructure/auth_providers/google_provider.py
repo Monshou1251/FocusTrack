@@ -5,6 +5,8 @@ from app.core.config import settings
 from app.core.interfaces import OAuthProvider
 
 class GoogleOAuthProvider(OAuthProvider):
+    name = "google"
+    
     async def exchange_code_for_token(self, code: str) -> dict:
         token_url = "https://oauth2.googleapis.com/token"
         data = {

@@ -5,6 +5,7 @@ from app.schemas.user import UserCreate
 from app.schemas.auth import UserAuthForm
 from app.db.models.user import User
 from app.core.interfaces import PasswordHasher, TokenService
+from app.infrastructure.auth_providers.sqlalchemy_user_provider import SQLAlchemyUserRepository
 from fastapi import HTTPException, status
 
 
@@ -13,7 +14,8 @@ class DummyHasher(PasswordHasher):
         return f"hashed-{password}"
     
     def verify(self, plain: str, hashed: str) -> bool:
-        return plain == "correct_password" and hashed == "hashed_password"
+        return hashed == self.hash(plain)
+
 
 
 class DummyTokenService(TokenService):
@@ -39,13 +41,11 @@ def mock_db_user_found():
 
 @pytest.mark.asyncio
 async def test_register_user_success():
-    # Создаём мок сессии
     mock_session = AsyncMock()
 
     mock_execute_result = Mock()
     mock_scalars = Mock()
-    mock_scalars.first.return_value = None  # пользователь не найден
-
+    mock_scalars.first.return_value = None 
     mock_execute_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_execute_result
 
@@ -56,7 +56,8 @@ async def test_register_user_success():
     user_data = UserCreate(email="test@example.com", password="secret")
     hasher = DummyHasher()
 
-    result = await register_user(user_data, mock_session, hasher)
+    repo = SQLAlchemyUserRepository(mock_session)
+    result = await register_user(user_data, repo, hasher)
 
     assert result == {"msg": "User created successfully."}
     mock_session.add.assert_called()
@@ -77,19 +78,32 @@ async def test_register_user_existing_email(mock_db_user_found):
 
 
 @pytest.mark.asyncio
-async def test_authenticate_user_success(mock_db_user_found):
-    mock_session, mock_user = mock_db_user_found
-
-    form_data = UserAuthForm(email="test@example.com", password="correct_password")
+async def test_authenticate_user_success():
+    # Arrange
+    form_data = UserAuthForm(email='test@example.com', password='correct_password')
+    
+    user_repo = AsyncMock()
     hasher = DummyHasher()
     token_service = DummyTokenService()
 
-    result = await authenticate_user(form_data, mock_session, hasher, token_service)
-    
+    mock_user = Mock()
+    mock_user.email = form_data.email
+    mock_user.hashed_password = hasher.hash("correct_password")
+    mock_user.auth_provider = "email"
+
+    # Мокаем метод get_user_by_email
+    user_repo.get_user_by_email.return_value = mock_user
+
+    # Act
+    result = await authenticate_user(form_data, user_repo, hasher, token_service)
+
+    # Assert
     assert result == {
         "access_token": "mocked_token",
         "token_type": "bearer"
     }
+
+    user_repo.get_user_by_email.assert_awaited_once_with(form_data.email)
 
 
 @pytest.mark.asyncio

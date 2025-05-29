@@ -32,11 +32,11 @@ async def login(
 @router.post("/google_auth")
 async def auth_google(
     payload: dict,
-    user_repo: UserRepository = Depends(get_user_repository),
     token_service = Depends(get_token_service),
-    provider: OAuthProvider = Depends(get_google_provider)
+    provider: OAuthProvider = Depends(get_google_provider),
+    user_repo: UserRepository = Depends(get_user_repository),
 ):
-    return await oauth_login(payload["code"], user_repo, provider, token_service)
+    return await oauth_login(payload["code"], provider, token_service, user_repo)
 
 
 @router.get("/me")
