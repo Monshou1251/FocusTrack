@@ -2,6 +2,22 @@
 # README_DEV
 
 ---
+## 29 мая 2025 Аутентификация (Google, OAuth)
+- Доделал вход и регистрацию через oauth
+- SQLAlchemyUserRepository обновил, добавил методы для работы с oauth (get_user_by_oauth, create_oauth_user, create_oauth_account)
+- Добавлен интерфейс OAuthProvider
+- Добавлен серивс oauth_login вкратце что там делается:
+* Обменивает code на access_token через выбранного OAuthProvider
+* Получает информацию о пользователе с помощью access_token
+* Ищет пользователя в базе по связке provider + provider_id
+* Если не найден — ищет по email, и если тоже не найден — создаёт нового пользователя
+* Создаёт запись об OAuth-аккаунте, если её нет
+* Генерирует JWT-токен и возвращает его клиенту
+
+### Дальше
+- Завязать OAuth аутентификацию на работу с базой.
+
+---
 ## 26 мая 2025 Аутентификация (Google, OAuth)
 - Разнес логику аутентифицкации и регистрации. Теперь всё красиво.
 - Создан интерфейс UserRepository с методами get_by_email, exists_by_email, create_user
