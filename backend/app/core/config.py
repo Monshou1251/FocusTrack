@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     CLIENT_ID: str
     CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str
+    RABBITMQ_URL: str = "amqp://guest:guest@localhost/"
+    RABBITMQ_LOG_QUEUE: str = "log_queue"
 
     model_config = ConfigDict(env_file=".env")
 

@@ -1,8 +1,9 @@
-from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
+from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository, LogPublisher
 from app.core.security import BcryptHasher, JWTTokenService
 from app.infrastructure.auth_providers.google_provider import GoogleOAuthProvider
 from app.infrastructure.auth_providers.sqlalchemy_user_provider import SQLAlchemyUserRepository
 from app.db.session import get_db
+from app.infrastructure.logging.rabbitmq_logger import RabbitMQLogPublisher
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
@@ -21,3 +22,6 @@ def get_user_repository(
     db: AsyncSession = Depends(get_db)    
 ) -> UserRepository:
     return SQLAlchemyUserRepository(db)
+
+def get_log_publisher() -> LogPublisher:
+    return RabbitMQLogPublisher()

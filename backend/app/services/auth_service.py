@@ -7,13 +7,12 @@ from app.db.models.user import User, OAuthAccount
 from app.schemas.auth import OAuth2EmailRequestForm
 from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
 from app.core.responses import success_response, error_response
-import pprint
+from app.messaging.rabbitmq.publisher import publish_log
+from datetime import datetime, timezone
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login') 
 
-
-from fastapi import status
 
 async def register_user(
     form_data: OAuth2EmailRequestForm,
@@ -43,16 +42,29 @@ async def authenticate_user(
     form_data: OAuth2EmailRequestForm,
     user_repo: UserRepository,
     hasher: PasswordHasher,
-    token_service: TokenService
+    token_service: TokenService,
+    client_ip: str
 ):
     user = await user_repo.get_user_by_email(form_data.email)
 
-    if not user or not hasher.verify(form_data.password, user.hashed_password):
-        return error_response("Incorrect email or password", status_code=401)
+    success = False  # по умолчанию неуспешно
+    if user and hasher.verify(form_data.password, user.hashed_password):
+        success = True
+        token = token_service.create_token({"sub": user.email})
+        response = success_response("Authenticated successfully", data={"access_token": token, "token_type": "bearer"})
+    else:
+        response = error_response("Incorrect email or password", status_code=401)
 
-    token = token_service.create_token({"sub": user.email})
     
-    return success_response("Authenticated successfully", data={"access_token": token, "token_type": "bearer"})
+    publish_log({
+        "event": "user_login_attempt",
+        "email": form_data.email,
+        "success": success,
+        "ip": client_ip,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+
+    return response
 
 
 

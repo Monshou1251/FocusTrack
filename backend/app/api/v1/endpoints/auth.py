@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from typing import Annotated
 from app.db.models.user import User
 from app.schemas.auth import OAuth2EmailRequestForm
@@ -21,13 +21,20 @@ async def register(
 
 @router.post("/login")
 async def login(
-    form_data: Annotated[OAuth2EmailRequestForm, Depends()],
+    form_data: OAuth2EmailRequestForm = Depends(),
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     token_service: TokenService = Depends(get_token_service),
+    request: Request = None
 ):
-    return await authenticate_user(form_data, user_repo, hasher, token_service)
-
+    client_ip = request.client.host if request and request.client else "unknown"
+    return await authenticate_user(
+        form_data=form_data,
+        user_repo=user_repo,
+        hasher=hasher,
+        token_service=token_service,
+        client_ip=client_ip
+    )
 
 @router.post("/google_auth")
 async def auth_google(
