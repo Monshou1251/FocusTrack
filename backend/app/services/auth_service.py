@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from app.db.models.user import User, OAuthAccount
 from app.schemas.auth import OAuth2EmailRequestForm
 from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
+from app.core.responses import success_response, error_response
 import pprint
 
 
@@ -26,24 +27,16 @@ async def register_user(
     
     if existing_user:
         if existing_user.auth_provider != 'email':
-            return {
-                "success": False,
-                "error": "Email already registered through OAuth"
-            }
+            return error_response("Email already registered through OAuth", status_code=409)
+
         else:
-            return {
-                "success": False,
-                "error": "Email already registered"
-            }
+            return error_response("Email already registered", status_code=409)
+
 
     hashed_password = hasher.hash(password)
     await user_repo.create_user(email, hashed_password, auth_provider="email")
 
-    return {
-        "success": True,
-        "message": "User created successfully."
-    }
-
+    return success_response("User created successfully.")
 
 
 async def authenticate_user(
@@ -55,14 +48,12 @@ async def authenticate_user(
     user = await user_repo.get_user_by_email(form_data.email)
 
     if not user or not hasher.verify(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
-        )
+        return error_response("Incorrect email or password", status_code=401)
 
     token = token_service.create_token({"sub": user.email})
     
-    return {"access_token": token, "token_type": "bearer"}
+    return success_response("Authenticated successfully", data={"access_token": token, "token_type": "bearer"})
+
 
 
 async def oauth_login(
@@ -71,9 +62,15 @@ async def oauth_login(
     token_service: TokenService,
     user_repo: UserRepository,
 ):
-    token_data = await oauth_provider.exchange_code_for_token(code)
-    access_token = token_data["access_token"]
-    user_info = await oauth_provider.get_user_info(access_token)
+    try:
+        token_data = await oauth_provider.exchange_code_for_token(code)
+        access_token = token_data["access_token"]
+        user_info = await oauth_provider.get_user_info(access_token)
+    except Exception:
+        return error_response("OAuth authentication failed", status_code=400)
+
+    if "id" not in user_info or "email" not in user_info:
+        return error_response("Invalid user info from OAuth provider", status_code=400)
 
     user = await user_repo.get_user_by_oauth(oauth_provider.name, user_info["id"])
     if not user:
@@ -90,7 +87,8 @@ async def oauth_login(
         )
 
     token = token_service.create_token({"sub": user.email})
-    return {"access_token": token, "token_type": "bearer"}
+    return success_response("Authenticated via OAuth", data={"access_token": token, "token_type": "bearer"})
+
 
 
 

@@ -67,43 +67,43 @@ const signIn = async () => {
     form.append('password', password.value)
 
     const response = await axios.post('/api/auth/login', form)
+    const data = response.data
 
-    if (response.status == 200) {
-      alert("✅ Успешный вход!");
+    if (data.success) {
+      alert("✅ Successfully signed in!")
       // router.push({ name: 'home' })
     } else {
-      console.log('Unexpected code:', response.status)
+      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
     }
 
   } catch (error) {
-    console.log('Error occurred:', error.response?.data?.detail ?? error)
+    const errData = error.response?.data
+    const errMsg = errData?.error ?? "Login failed"
+    alert("❌ " + errMsg)
   }
 }
 
 
 const signUp = async () => {
   try {
-    const form = new FormData();
-    form.append('username', email.value);
-    form.append('password', password.value);
+    const form = new FormData()
+    form.append('username', email.value)
+    form.append('password', password.value)
 
-    const response = await axios.post('/api/auth/register', form);
-    const data = response.data;
+    const response = await axios.post('/api/auth/register', form)
+    const data = response.data
 
     if (data.success) {
-      alert("✅ Успешная регистрация!");
+      alert("✅ Successfully registered!")
     } else {
-      alert("❌ Ошибка: " + (data.error || "Неизвестная ошибка"));
+      alert("❌ Error: " + (data.error ?? "Registration failed"))
     }
 
-  } catch(error) {
-    // Ошибка HTTP или сети
-    if (error.response && error.response.data && error.response.data.detail) {
-      alert("❌ Ошибка: " + error.response.data.detail);
-    } else {
-      alert("❌ Ошибка: " + error.message);
-    }
-    console.error('Error occured:', error);
+  } catch (error) {
+    const errData = error?.response?.data
+    const errMsg = errData?.error ?? "Registration failed"
+    alert("❌ " + errMsg)
+    console.error("Registration error:", error)
   }
 }
 
