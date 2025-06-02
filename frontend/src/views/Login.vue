@@ -63,31 +63,37 @@ const password = ref("")
 const signIn = async () => {
   try {
     const form = new FormData()
-    form.append('username', email.value)
+    form.append('email', email.value)
     form.append('password', password.value)
 
     const response = await axios.post('/api/auth/login', form)
     const data = response.data
 
+    console.log(data)
+
     if (data.success) {
       alert("✅ Successfully signed in!")
       // router.push({ name: 'home' })
     } else {
-      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
+      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed11"))
     }
 
   } catch (error) {
     const errData = error.response?.data
-    const errMsg = errData?.error ?? "Login failed"
+    const errMsg = errData?.message ?? "Login failed"
     alert("❌ " + errMsg)
   }
 }
 
 
 const signUp = async () => {
+  if (!email.value.trim() || !password.value.trim()) {
+    alert("❌ Please enter both email and password.")
+    return
+  }
   try {
     const form = new FormData()
-    form.append('username', email.value)
+    form.append('email', email.value)
     form.append('password', password.value)
 
     const response = await axios.post('/api/auth/register', form)
@@ -100,8 +106,9 @@ const signUp = async () => {
     }
 
   } catch (error) {
+    console.log(error)
     const errData = error?.response?.data
-    const errMsg = errData?.error ?? "Registration failed"
+    const errMsg = errData?.message ?? "Registration failed2"
     alert("❌ " + errMsg)
     console.error("Registration error:", error)
   }

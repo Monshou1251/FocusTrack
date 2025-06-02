@@ -1,13 +1,8 @@
-from typing import Annotated
-from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.db.models.user import User, OAuthAccount
-from app.schemas.auth import OAuth2EmailRequestForm
-from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository
+from app.schemas.auth import EmailLoginForm, EmailRegisterForm
+from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository, LogPublisher
 from app.core.responses import success_response, error_response
-from app.messaging.rabbitmq.publisher import publish_log
+from app.domain.exceptions.auth_exceptions import InvalidCredentialsError, EmailAlreadyRegisteredError
 from datetime import datetime, timezone
 
 
@@ -15,56 +10,94 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 async def register_user(
-    form_data: OAuth2EmailRequestForm,
+    form_data: EmailRegisterForm,
     user_repo: UserRepository,
-    hasher: PasswordHasher
+    hasher: PasswordHasher,
+    client_ip: str,
+    log_publisher: LogPublisher
 ):
     email = form_data.email
     password = form_data.password
+    print(email)
+    print(password)
+    
+    error_message = None
+    success = False
+
+    if not email or not password:
+        error_message = "Please provide email and password"
+        raise EmailAlreadyRegisteredError(error_message) 
     
     existing_user = await user_repo.get_user_by_email(email)
-    
+
     if existing_user:
         if existing_user.auth_provider != 'email':
-            return error_response("Email already registered through OAuth", status_code=409)
-
+            error_message = "Email already registered through OAuth"
         else:
-            return error_response("Email already registered", status_code=409)
+            error_message = "Email already registered"
 
+        await log_publisher.publish({
+            "event": "user_register_attempt",
+            "email": email,
+            "success": success,
+            "ip": client_ip,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": error_message
+        })
+
+        raise EmailAlreadyRegisteredError(error_message)
 
     hashed_password = hasher.hash(password)
     await user_repo.create_user(email, hashed_password, auth_provider="email")
+    success = True
 
-    return success_response("User created successfully.")
+    await log_publisher.publish({
+        "event": "user_register_attempt",
+        "email": email,
+        "success": success,
+        "ip": client_ip,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "error": None
+    })
+
 
 
 async def authenticate_user(
-    form_data: OAuth2EmailRequestForm,
+    form_data: EmailLoginForm,
     user_repo: UserRepository,
     hasher: PasswordHasher,
     token_service: TokenService,
-    client_ip: str
+    client_ip: str,
+    log_publisher: LogPublisher
 ):
     user = await user_repo.get_user_by_email(form_data.email)
 
-    success = False  # по умолчанию неуспешно
+    success = False
+    token = None
+    error_message = None
+
     if user and hasher.verify(form_data.password, user.hashed_password):
         success = True
         token = token_service.create_token({"sub": user.email})
-        response = success_response("Authenticated successfully", data={"access_token": token, "token_type": "bearer"})
     else:
-        response = error_response("Incorrect email or password", status_code=401)
+        error_message = "Incorrect email or password"
 
-    
-    publish_log({
+    await log_publisher.publish({
         "event": "user_login_attempt",
         "email": form_data.email,
         "success": success,
         "ip": client_ip,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "error": error_message
     })
 
-    return response
+    if not success:
+        raise InvalidCredentialsError()
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 
 
