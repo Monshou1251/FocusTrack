@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, Request, Form
 from typing import Annotated
 from app.db.models.user import User
 from app.core.responses import success_response, error_response
@@ -12,10 +12,9 @@ from app.domain.exceptions.auth_exceptions import InvalidCredentialsError, Email
 router = APIRouter()
 
 
-
 @router.post("/register")
 async def register(
-    form_data: Annotated[EmailRegisterForm, Depends(EmailRegisterForm.as_form)],
+    form_data: Annotated[EmailRegisterForm, Form()],
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     log_publisher: LogPublisher = Depends(get_log_publisher),
@@ -41,7 +40,7 @@ async def register(
 
 @router.post("/login")
 async def login(
-    form_data: Annotated[EmailLoginForm, Depends(EmailLoginForm.as_form)],
+    form_data: Annotated[EmailLoginForm, Form()],
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     token_service: TokenService = Depends(get_token_service),

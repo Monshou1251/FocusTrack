@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Protocol
 from app.db.models.user import User
+from app.core.logging.events import LogEvent
 
 
 class PasswordHasher(Protocol):
@@ -28,5 +29,5 @@ class OAuthProvider(Protocol):
     
 
 class LogPublisher(Protocol):
-    def publish(self, log: dict) -> None: ...
+    async def publish(self, event: LogEvent) -> None: ...
     

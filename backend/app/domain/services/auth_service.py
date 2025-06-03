@@ -3,7 +3,10 @@ from app.schemas.auth import EmailLoginForm, EmailRegisterForm
 from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository, LogPublisher
 from app.core.responses import success_response, error_response
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError, EmailAlreadyRegisteredError
+from app.domain.services.logging_service import log_auth_attempt, log_registration_attempt
 from datetime import datetime, timezone
+import asyncio
+
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login') 
@@ -18,47 +21,36 @@ async def register_user(
 ):
     email = form_data.email
     password = form_data.password
-    print(email)
-    print(password)
     
     error_message = None
     success = False
+    try:
+        if not email or not password:
+            error_message = "Please provide email and password"
+            raise EmailAlreadyRegisteredError(error_message) 
+        
+        existing_user = await user_repo.get_user_by_email(email)
 
-    if not email or not password:
-        error_message = "Please provide email and password"
-        raise EmailAlreadyRegisteredError(error_message) 
-    
-    existing_user = await user_repo.get_user_by_email(email)
+        if existing_user:
+            if existing_user.auth_provider != 'email':
+                error_message = "Email already registered through OAuth"
+            else:
+                error_message = "Email already registered"
 
-    if existing_user:
-        if existing_user.auth_provider != 'email':
-            error_message = "Email already registered through OAuth"
-        else:
-            error_message = "Email already registered"
+            raise EmailAlreadyRegisteredError(error_message)
 
-        await log_publisher.publish({
-            "event": "user_register_attempt",
-            "email": email,
-            "success": success,
-            "ip": client_ip,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "error": error_message
-        })
+        hashed_password = hasher.hash(password)
+        await user_repo.create_user(email, hashed_password, auth_provider="email")
+        success = True
 
-        raise EmailAlreadyRegisteredError(error_message)
-
-    hashed_password = hasher.hash(password)
-    await user_repo.create_user(email, hashed_password, auth_provider="email")
-    success = True
-
-    await log_publisher.publish({
-        "event": "user_register_attempt",
-        "email": email,
-        "success": success,
-        "ip": client_ip,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "error": None
-    })
+    finally:
+        asyncio.create_task(log_registration_attempt(
+            log_publisher=log_publisher,
+            email=form_data.email,
+            success=success,
+            ip=client_ip,
+            error=error_message
+        ))
 
 
 
@@ -82,14 +74,13 @@ async def authenticate_user(
     else:
         error_message = "Incorrect email or password"
 
-    await log_publisher.publish({
-        "event": "user_login_attempt",
-        "email": form_data.email,
-        "success": success,
-        "ip": client_ip,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "error": error_message
-    })
+    asyncio.create_task(log_auth_attempt(
+        log_publisher=log_publisher,
+        email=form_data.email,
+        success=success,
+        ip=client_ip,
+        error=error_message
+    ))
 
     if not success:
         raise InvalidCredentialsError()

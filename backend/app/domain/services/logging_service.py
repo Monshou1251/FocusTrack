@@ -1,17 +1,34 @@
-from datetime import datetime, timezone
 from app.core.interfaces import LogPublisher
+from app.core.logging.events import UserLoginAttemptLog, UserRegistrationAttemptLog, OAuthLoginAttemptLog
 
-async def log_auth(
-    event: str,
+async def log_auth_attempt(
     log_publisher: LogPublisher,
     email: str,
     success: bool,
     ip: str,
+    error: str | None = None
 ):
-    await log_publisher.publish({
-        "event": event,
-        "email": email,
-        "success": success,
-        "ip": ip,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    })
+    event = UserLoginAttemptLog(email=email, success=success, ip=ip, error=error)
+    await log_publisher.publish(event)
+    
+    
+async def log_registration_attempt(
+    log_publisher: LogPublisher,
+    email: str,
+    success: bool,
+    ip: str,
+    error: str | None = None
+):
+    event = UserRegistrationAttemptLog(email=email, success=success, ip=ip, error=error)
+    await log_publisher.publish(event)
+    
+    
+async def log_oauth_attempt(
+    log_publisher: LogPublisher,
+    email: str,
+    success: bool,
+    ip: str,
+    error: str | None = None
+):
+    event = OAuthLoginAttemptLog(email=email, success=success, ip=ip, error=error)
+    await log_publisher.publish(event)
