@@ -13,5 +13,3 @@ class InvalidCredentialsError(AppException):
 class EmailAlreadyRegisteredError(AppException):
     def __init__(self, message="Email already registered", status_code=409):
         super().__init__(message, status_code=status_code)
-        
-        

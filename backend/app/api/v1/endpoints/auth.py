@@ -1,25 +1,47 @@
-from fastapi import APIRouter, Depends, Request, Form
 from typing import Annotated
-from app.db.models.user import User
-from app.core.responses import success_response, error_response
-from app.schemas.auth import EmailLoginForm, EmailRegisterForm
-from app.domain.services.auth_service import register_user, authenticate_user, oauth_login
-from app.core.dependencies import get_password_hasher, get_token_service, get_google_provider, get_user_repository, get_log_publisher
-from app.core.interfaces import PasswordHasher, TokenService, OAuthProvider, UserRepository, LogPublisher
+
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import JSONResponse
+
+from app.core.dependencies import (
+    get_google_provider,
+    get_log_publisher,
+    get_password_hasher,
+    get_token_service,
+    get_user_repository,
+)
+from app.core.interfaces import (
+    LogPublisher,
+    OAuthProvider,
+    PasswordHasher,
+    TokenService,
+    UserRepository,
+)
+from app.core.responses import error_response, success_response
 from app.core.security import get_current_user
-from app.domain.exceptions.auth_exceptions import InvalidCredentialsError, EmailAlreadyRegisteredError
+from app.db.models.user import User
+from app.domain.exceptions.auth_exceptions import (
+    EmailAlreadyRegisteredError,
+    InvalidCredentialsError,
+)
+from app.domain.services.auth_service import (
+    authenticate_oauth_user,
+    authenticate_user,
+    register_user,
+)
+from app.schemas.auth import EmailLoginForm, EmailRegisterForm
 
 router = APIRouter()
 
 
 @router.post("/register")
 async def register(
+    request: Request,
     form_data: Annotated[EmailRegisterForm, Form()],
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     log_publisher: LogPublisher = Depends(get_log_publisher),
-    request: Request = None
-):
+) -> JSONResponse:
     client_ip = request.client.host if request and request.client else "unknown"
 
     try:
@@ -28,7 +50,7 @@ async def register(
             user_repo=user_repo,
             hasher=hasher,
             client_ip=client_ip,
-            log_publisher=log_publisher
+            log_publisher=log_publisher,
         )
         return success_response("User registered successfully")
 
@@ -36,17 +58,15 @@ async def register(
         return error_response(str(e), status_code=409)
 
 
-
-
 @router.post("/login")
 async def login(
+    request: Request,
     form_data: Annotated[EmailLoginForm, Form()],
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     token_service: TokenService = Depends(get_token_service),
     log_publisher: LogPublisher = Depends(get_log_publisher),
-    request: Request = None
-):
+) -> JSONResponse:
     client_ip = request.client.host if request and request.client else "unknown"
     try:
         token_data = await authenticate_user(
@@ -55,28 +75,39 @@ async def login(
             hasher=hasher,
             token_service=token_service,
             client_ip=client_ip,
-            log_publisher=log_publisher
+            log_publisher=log_publisher,
         )
-        
+
         return success_response("Authenticated successfully", data=token_data)
 
     except InvalidCredentialsError as e:
         return error_response(str(e), status_code=401)
-    
-    
+
 
 @router.post("/google_auth")
 async def auth_google(
+    request: Request,
     payload: dict,
-    token_service = Depends(get_token_service),
+    token_service: TokenService = Depends(get_token_service),
     provider: OAuthProvider = Depends(get_google_provider),
     user_repo: UserRepository = Depends(get_user_repository),
-):
-    return await oauth_login(payload["code"], provider, token_service, user_repo)
+    log_publisher: LogPublisher = Depends(get_log_publisher),
+) -> JSONResponse:
+    client_ip = request.client.host if request and request.client else "unknown"
+    try:
+        token_data = await authenticate_oauth_user(
+            code=payload["code"],
+            oauth_provider=provider,
+            token_service=token_service,
+            user_repo=user_repo,
+            client_ip=client_ip,
+            log_publisher=log_publisher,
+        )
+        return success_response("Authenticated via OAuth", data=token_data)
+    except InvalidCredentialsError:
+        return error_response("OAuth authentication failed", status_code=400)
 
 
 @router.get("/me")
-async def protected_route(
-    current_user: User = Depends(get_current_user)
-):
+async def protected_route(current_user: User = Depends(get_current_user)):
     return {"message": f"Hello, {current_user.email}"}

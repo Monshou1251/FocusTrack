@@ -1,11 +1,14 @@
 # app/core/logging/rabbitmq_log_publisher.py
 
-from aio_pika import connect_robust, Message
 import json
-from app.core.config import settings
 import logging
-from app.core.interfaces import LogPublisher
 import os
+
+from aio_pika import Message, connect_robust
+
+from app.core.config import settings
+from app.core.interfaces import LogPublisher
+from app.core.logging.events import LogEvent
 
 log_dir = "fallback_logs"
 log_file = "fallback_logs.log"
@@ -18,7 +21,7 @@ logger.setLevel(logging.INFO)
 
 if not logger.hasHandlers():
     handler = logging.FileHandler(log_path)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
@@ -38,13 +41,15 @@ class RabbitMQLogPublisher(LogPublisher):
             self.channel = await self.connection.channel()
             await self.channel.declare_queue(self.queue_name, durable=True)
 
-    async def publish(self, log: dict) -> None:
+    async def publish(self, log: LogEvent) -> None:
         try:
             await self.connect()
             message = Message(body=json.dumps(log.to_dict()).encode(), delivery_mode=2)
-            await self.channel.default_exchange.publish(message, routing_key=self.queue_name)
+            await self.channel.default_exchange.publish(
+                message, routing_key=self.queue_name
+            )
             print("RabbitMQ available, message sent")
         except Exception as e:
             logger.warning(f"RabbitMQ unavailable: {e}")
             print(f"RabbitMQ unavailable: {e}")
-            logger.info(json.dumps(log.to_dict())) 
+            logger.info(json.dumps(log.to_dict()))

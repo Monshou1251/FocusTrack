@@ -1,6 +1,6 @@
-import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Вычисляем абсолютный путь до backend/.env
 env_path = Path(__file__).resolve().parents[2] / ".env"

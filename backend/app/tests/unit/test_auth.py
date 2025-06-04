@@ -1,25 +1,33 @@
-import pytest
+from datetime import timedelta
+from typing import Any
 from unittest.mock import AsyncMock, Mock
-from app.services.auth_service import register_user, authenticate_user
-from app.schemas.user import UserCreate
-from app.schemas.auth import UserAuthForm
-from app.db.models.user import User
-from app.core.interfaces import PasswordHasher, TokenService
-from app.infrastructure.auth_providers.sqlalchemy_user_provider import SQLAlchemyUserRepository
+
+import pytest
 from fastapi import HTTPException, status
+
+from app.core.interfaces import PasswordHasher, TokenService
+from app.db.models.user import User
+from app.domain.services.auth_service import authenticate_user, register_user
+from app.infrastructure.auth_providers.sqlalchemy_user_provider import (
+    SQLAlchemyUserRepository,
+)
+from app.schemas.auth import UserAuthForm
 
 
 class DummyHasher(PasswordHasher):
     def hash(self, password: str) -> str:
         return f"hashed-{password}"
-    
+
     def verify(self, plain: str, hashed: str) -> bool:
         return hashed == self.hash(plain)
 
 
-
 class DummyTokenService(TokenService):
-    def create_token(self, data: dict) -> str:
+    def create_token(
+        self,
+        data: dict[Any, Any],
+        expires_delta: timedelta | None = None,
+    ) -> str:
         return "mocked_token"
 
 
@@ -31,11 +39,11 @@ def mock_db_user_found():
     mock_user = Mock(spec=User)
     mock_user.email = "test@example.com"
     mock_user.hashed_password = "hashed_password"
-    
+
     mock_scalars.first.return_value = mock_user
     mock_execute_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_execute_result
-    
+
     return mock_session, mock_user
 
 
@@ -45,7 +53,7 @@ async def test_register_user_success():
 
     mock_execute_result = Mock()
     mock_scalars = Mock()
-    mock_scalars.first.return_value = None 
+    mock_scalars.first.return_value = None
     mock_execute_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_execute_result
 
@@ -53,7 +61,7 @@ async def test_register_user_success():
     mock_session.commit = AsyncMock()
     mock_session.refresh = AsyncMock()
 
-    user_data = UserCreate(email="test@example.com", password="secret")
+    user_data = UserAuthForm(email="test@example.com", password="secret")
     hasher = DummyHasher()
 
     repo = SQLAlchemyUserRepository(mock_session)
@@ -68,7 +76,7 @@ async def test_register_user_success():
 @pytest.mark.asyncio
 async def test_register_user_existing_email(mock_db_user_found):
     mock_session, _ = mock_db_user_found
-    form_data = UserCreate(email="test@example.com", password="123")
+    form_data = UserAuthForm(email="test@example.com", password="123")
     hasher = DummyHasher()
 
     with pytest.raises(HTTPException) as exc_info:
@@ -80,8 +88,8 @@ async def test_register_user_existing_email(mock_db_user_found):
 @pytest.mark.asyncio
 async def test_authenticate_user_success():
     # Arrange
-    form_data = UserAuthForm(email='test@example.com', password='correct_password')
-    
+    form_data = UserAuthForm(email="test@example.com", password="correct_password")
+
     user_repo = AsyncMock()
     hasher = DummyHasher()
     token_service = DummyTokenService()
@@ -98,10 +106,7 @@ async def test_authenticate_user_success():
     result = await authenticate_user(form_data, user_repo, hasher, token_service)
 
     # Assert
-    assert result == {
-        "access_token": "mocked_token",
-        "token_type": "bearer"
-    }
+    assert result == {"access_token": "mocked_token", "token_type": "bearer"}
 
     user_repo.get_user_by_email.assert_awaited_once_with(form_data.email)
 
@@ -109,18 +114,16 @@ async def test_authenticate_user_success():
 @pytest.mark.asyncio
 async def test_authenticate_user_fail(mock_db_user_found):
     mock_session, _ = mock_db_user_found
-    
+
     form_data = UserAuthForm(
-        email="failed_test_user@example.com",
-        password="wrong_password"
+        email="failed_test_user@example.com", password="wrong_password"
     )
-    
+
     hasher = DummyHasher()
     token_service = DummyTokenService()
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await authenticate_user(form_data, mock_session, hasher, token_service)
-        
+
     assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
     assert exc_info.value.detail == "Incorrect email or password"
-
