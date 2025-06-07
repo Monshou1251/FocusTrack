@@ -1,4 +1,4 @@
-# app/infrastructure/oauth_providers/google.py
+# app/infrastructure/oauth_providers/google_provider.py
 
 import httpx
 

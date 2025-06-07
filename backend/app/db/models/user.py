@@ -1,9 +1,8 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-
-# pyright: reportGeneralTypeIssues=false
+from app.domain.enums.user_role import UserRole
 
 
 class User(Base):
@@ -14,6 +13,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     hashed_password: Mapped[str | None] = mapped_column(String, nullable=True)
     auth_provider = Column(String, default="email", nullable=False)
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
 
     oauth_accounts = relationship(
         "OAuthAccount", back_populates="user", cascade="all, delete-orphan"

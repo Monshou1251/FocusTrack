@@ -2,12 +2,15 @@ from datetime import timedelta
 from typing import Protocol
 
 from app.core.logging.events import LogEvent
-from app.db.models.user import User
+from app.domain.entities.user import User
+from app.domain.value_objects.user_password_hash import UserPasswordHash
 
 
 class PasswordHasher(Protocol):
-    def hash(self, password: str) -> str: ...
-    def verify(self, plain_password: str, hashed_password) -> bool: ...
+    def hash(self, password: str) -> UserPasswordHash: ...
+    def verify(
+        self, plain_password: str, hashed_password: UserPasswordHash
+    ) -> bool: ...
 
 
 class TokenService(Protocol):

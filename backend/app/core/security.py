@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.interfaces import PasswordHasher, TokenService
 from app.db.models.user import User
 from app.db.session import get_db
+from app.domain.value_objects.user_password_hash import UserPasswordHash
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -23,10 +24,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 class BcryptHasher(PasswordHasher):
-    def hash(self, password: str) -> str:
+    def hash(self, password: str) -> UserPasswordHash:
         return pwd_context.hash(password)
 
-    def verify(self, plain_password: str, hashed_password: str) -> bool:
+    def verify(self, plain_password: str, hashed_password: UserPasswordHash) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
 
 
