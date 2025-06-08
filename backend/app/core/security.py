@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.core.interfaces import PasswordHasher, TokenService
 from app.db.models.user import User
 from app.db.session import get_db
-from app.domain.value_objects.user_password_hash import UserPasswordHash
+from app.domain.value_objects.user import UserPasswordHash
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -28,7 +28,7 @@ class BcryptHasher(PasswordHasher):
         return pwd_context.hash(password)
 
     def verify(self, plain_password: str, hashed_password: UserPasswordHash) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
+        return pwd_context.verify(plain_password, str(hashed_password))
 
 
 class JWTTokenService(TokenService):

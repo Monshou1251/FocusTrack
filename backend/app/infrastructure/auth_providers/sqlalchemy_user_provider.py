@@ -1,59 +1,91 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.interfaces import UserRepository
-from app.db.models.user import OAuthAccount, User
+from app.core.interfaces import OAuthAccountRepository, UserRepository
+from app.db.models.user import OAuthAccount
+from app.db.models.user import User as ORMUser
+from app.domain.entities.user import User as EntityUser
+from app.infrastructure.sqla_persistence.mappings.user_mapping import (
+    user_orm_to_entity,
+)
 
 
 class SQLAlchemyUserRepository(UserRepository):
-    def __init__(self, db: AsyncSession):
-        self.db = db
+    def __init__(self, session: AsyncSession):
+        self.session = session
 
-    async def get_user_by_email(self, email: str) -> User | None:
-        result = await self.db.execute(select(User).where(User.email == email))
+    async def get_user_by_email(self, email: str) -> EntityUser | None:
+        result = await self.session.execute(
+            select(ORMUser).where(ORMUser.email == email)
+        )
+        orm_user = result.scalar_one_or_none()
 
-        return result.scalars().first()
+        return user_orm_to_entity(orm_user) if orm_user else None
 
     async def create_user(
         self, email: str, hashed_password: str, auth_provider: str = "email"
-    ) -> User:
-        user = User(
-            email=email, hashed_password=hashed_password, auth_provider=auth_provider
+    ) -> EntityUser:
+        orm_user = ORMUser(
+            email=email,
+            hashed_password=hashed_password,
+            auth_provider=auth_provider,
+            username=email.split("@")[0],
         )
-        self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
+        self.session.add(orm_user)
+        await self.session.commit()
+        await self.session.refresh(orm_user)
+        return user_orm_to_entity(orm_user)
 
-        return user
 
-    async def get_user_by_oauth(self, provider: str, provider_id: str) -> User | None:
-        result = await self.db.execute(
-            select(User)
-            .join(OAuthAccount)
+class SQLAlchemyOAuthAccountRepository(OAuthAccountRepository):
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_user_by_oauth(
+        self, provider: str, provider_id: str
+    ) -> EntityUser | None:
+        # Найдём OAuthAccount с таким провайдером и ID
+        stmt = (
+            select(ORMUser)
+            .join(OAuthAccount, ORMUser.id == OAuthAccount.user_id)
             .where(
                 OAuthAccount.provider == provider,
                 OAuthAccount.provider_id == provider_id,
             )
         )
+        result = await self.session.execute(stmt)
+        orm_user = result.scalars().first()
+        if orm_user is None:
+            return None
+        return user_orm_to_entity(orm_user)
 
-        return result.scalars().first()
-
-    async def create_oauth_user(self, email: str, auth_provider: str) -> User:
-        user = User(email=email, hashed_password=None, auth_provider=auth_provider)
-        self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
+    async def create_oauth_user(self, email: str, auth_provider: str) -> EntityUser:
+        user = ORMUser(
+            email=email,
+            hashed_password=None,
+            auth_provider=auth_provider,
+            username=email.split("@")[0],
+        )
+        self.session.add(user)
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user_orm_to_entity(user)
 
     async def create_oauth_account(
-        self, provider: str, provider_id: str, user: User
-    ) -> User:
+        self, provider: str, provider_id: str, user: EntityUser
+    ) -> EntityUser:
+        print("user: ", user)
         oauth_account = OAuthAccount(
             provider=provider,
             provider_id=provider_id,
-            user_id=user.id,
+            user_id=user.id_.value,
         )
-        self.db.add(oauth_account)
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
+        self.session.add(oauth_account)
+        await self.session.commit()
+
+        # Получаем ORMUser по user_id
+        stmt = select(ORMUser).where(ORMUser.id == user.id_.value)
+        result = await self.session.execute(stmt)
+        orm_user = result.scalar_one()
+
+        return user_orm_to_entity(orm_user)

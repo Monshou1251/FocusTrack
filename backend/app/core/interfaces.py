@@ -3,7 +3,7 @@ from typing import Protocol
 
 from app.core.logging.events import LogEvent
 from app.domain.entities.user import User
-from app.domain.value_objects.user_password_hash import UserPasswordHash
+from app.domain.value_objects.user import UserPasswordHash
 
 
 class PasswordHasher(Protocol):
@@ -25,10 +25,15 @@ class UserRepository(Protocol):
     async def create_user(
         self, email: str, hashed_password: str, auth_provider: str
     ) -> User: ...
+
+
+class OAuthAccountRepository(Protocol):
     async def get_user_by_oauth(
         self, provider: str, provider_id: str
     ) -> User | None: ...
+
     async def create_oauth_user(self, email: str, auth_provider: str) -> User: ...
+
     async def create_oauth_account(
         self, provider: str, provider_id: str, user: User
     ) -> User: ...

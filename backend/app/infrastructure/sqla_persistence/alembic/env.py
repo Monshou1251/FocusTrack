@@ -1,25 +1,21 @@
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context
-
-# Import your settings and Base model
 from app.core.config import settings
-from app.db.base import Base  # Your SQLAlchemy models should be imported here
+from app.db.base import Base
 
-# Load Alembic configuration
 config = context.config
 
 config.set_main_option(
     "sqlalchemy.url", settings.DATABASE_URL.replace("asyncpg", "psycopg2")
 )
 
-# Configure logging
 if config.config_file_name:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata  # Ensure migrations recognize your models
+target_metadata = Base.metadata
 
 
 def run_migrations_online():
@@ -34,7 +30,7 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True,  # Detect column type changes
+            compare_type=True,
         )
 
         with context.begin_transaction():

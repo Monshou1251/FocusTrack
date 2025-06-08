@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.core.interfaces import (
     LogPublisher,
+    OAuthAccountRepository,
     OAuthProvider,
     PasswordHasher,
     TokenService,
@@ -82,7 +83,7 @@ async def authenticate_user(
 
     if user and hasher.verify(form_data.password, user.hashed_password):
         success = True
-        token = token_service.create_token({"sub": user.email})
+        token = token_service.create_token({"sub": str(user.email)})
     else:
         error_message = "Incorrect email or password"
 
@@ -107,6 +108,7 @@ async def authenticate_oauth_user(
     oauth_provider: OAuthProvider,
     token_service: TokenService,
     user_repo: UserRepository,
+    oauth_repo: OAuthAccountRepository,
     client_ip: str,
     log_publisher: LogPublisher,
 ) -> dict:
@@ -124,21 +126,24 @@ async def authenticate_oauth_user(
             error = "Invalid user info from OAuth provider"
             raise InvalidCredentialsError()
 
-        user = await user_repo.get_user_by_oauth(oauth_provider.name, user_info["id"])
+        user = await oauth_repo.get_user_by_oauth(oauth_provider.name, user_info["id"])
         if not user:
             user = await user_repo.get_user_by_email(user_info["email"])
             if not user:
-                user = await user_repo.create_oauth_user(
+                user = await oauth_repo.create_oauth_user(
                     user_info["email"],
                     auth_provider=oauth_provider.name,
                 )
-            await user_repo.create_oauth_account(
+                if not user:
+                    raise RuntimeError("User creation failed")
+
+            await oauth_repo.create_oauth_account(
                 provider=oauth_provider.name,
                 provider_id=user_info["id"],
                 user=user,
             )
 
-        token = token_service.create_token({"sub": user.email})
+        token = token_service.create_token({"sub": str(user.email)})
         success = True
 
     except Exception as err:
