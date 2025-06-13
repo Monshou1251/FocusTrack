@@ -59,12 +59,18 @@ class SQLAlchemyOAuthAccountRepository(OAuthAccountRepository):
             return None
         return user_orm_to_entity(orm_user)
 
-    async def create_oauth_user(self, email: str, auth_provider: str) -> EntityUser:
+    async def create_oauth_user(
+        self,
+        email: str,
+        auth_provider: str,
+        avatar_url: str | None = None,
+    ) -> EntityUser:
         user = ORMUser(
             email=email,
             hashed_password=None,
             auth_provider=auth_provider,
             username=email.split("@")[0],
+            avatar_url=avatar_url,
         )
         self.session.add(user)
         await self.session.commit()
@@ -72,7 +78,10 @@ class SQLAlchemyOAuthAccountRepository(OAuthAccountRepository):
         return user_orm_to_entity(user)
 
     async def create_oauth_account(
-        self, provider: str, provider_id: str, user: EntityUser
+        self,
+        provider: str,
+        provider_id: str,
+        user: EntityUser,
     ) -> EntityUser:
         print("user: ", user)
         oauth_account = OAuthAccount(

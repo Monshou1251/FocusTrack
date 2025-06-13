@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.enums import UserRole
 from app.db.base import Base
-from app.domain.enums.user_role import UserRole
 
 
 class User(Base):
@@ -14,6 +14,7 @@ class User(Base):
     hashed_password: Mapped[str | None] = mapped_column(String, nullable=True)
     auth_provider = Column(String, default="email", nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
+    avatar_url: Mapped[str | None] = mapped_column(String, nullable=True)
 
     oauth_accounts = relationship(
         "OAuthAccount", back_populates="user", cascade="all, delete-orphan"

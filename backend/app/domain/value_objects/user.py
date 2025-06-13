@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+from urllib.parse import urlparse
 
 from app.domain.value_objects.base import ValueObject
 
@@ -36,3 +37,17 @@ class Username(ValueObject):
         super().__post_init__()
         if not (3 <= len(self.value) <= 30):
             raise ValueError("Username length must be between 3 and 30 characters")
+
+
+@dataclass(frozen=True, repr=False)
+class AvatarUrl(ValueObject):
+    value: str
+
+    def __post_init__(self):
+        super().__post_init__()
+        parsed = urlparse(self.value)
+        if not (parsed.scheme and parsed.netloc):
+            raise ValueError(f"Invalid URL format: {self.value}")
+
+    def __str__(self):
+        return self.value

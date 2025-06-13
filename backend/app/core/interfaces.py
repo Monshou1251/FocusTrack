@@ -32,7 +32,9 @@ class OAuthAccountRepository(Protocol):
         self, provider: str, provider_id: str
     ) -> User | None: ...
 
-    async def create_oauth_user(self, email: str, auth_provider: str) -> User: ...
+    async def create_oauth_user(
+        self, email: str, auth_provider: str, avatar_url: str | None
+    ) -> User: ...
 
     async def create_oauth_account(
         self, provider: str, provider_id: str, user: User

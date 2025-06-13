@@ -133,6 +133,7 @@ async def authenticate_oauth_user(
                 user = await oauth_repo.create_oauth_user(
                     user_info["email"],
                     auth_provider=oauth_provider.name,
+                    avatar_url=user_info.get("picture"),
                 )
                 if not user:
                     raise RuntimeError("User creation failed")

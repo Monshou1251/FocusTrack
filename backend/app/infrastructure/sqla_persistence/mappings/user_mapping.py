@@ -1,6 +1,12 @@
 from app.db.models.user import User as ORMUser
 from app.domain.entities.user import User as EntityUser
-from app.domain.value_objects.user import Email, UserId, Username, UserPasswordHash
+from app.domain.value_objects.user import (
+    AvatarUrl,
+    Email,
+    UserId,
+    Username,
+    UserPasswordHash,
+)
 
 
 def user_orm_to_entity(orm_user: ORMUser) -> EntityUser:
@@ -11,6 +17,7 @@ def user_orm_to_entity(orm_user: ORMUser) -> EntityUser:
         hashed_password=UserPasswordHash(orm_user.hashed_password),
         role=orm_user.role,
         auth_provider=orm_user.auth_provider,
+        avatar_url=AvatarUrl(orm_user.avatar_url),
     )
 
 
@@ -22,4 +29,5 @@ def user_entity_to_orm(entity: EntityUser) -> ORMUser:
         hashed_password=entity.hashed_password.value,
         role=entity.role,
         auth_provider=entity.auth_provider,
+        avatar_url=entity.avatar_url,
     )
