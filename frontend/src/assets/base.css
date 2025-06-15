@@ -4,8 +4,8 @@
   --vt-c-white-mute: #f2f2f2;
 
   --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
+  --vt-c-black-soft: #414141;
+  --vt-c-black-mute: #272727;
 
   --vt-c-indigo: #2c3e50;
 
@@ -66,7 +66,9 @@
 }
 
 body,
-html {
+html,
+#app {
+  width: 100%;
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
@@ -74,7 +76,7 @@ html {
     color 0.5s,
     background-color 0.3s ease-in-out;
   line-height: 1.6;
-  font-family: 'Jost';
+  font-family: 'Albert_Sans';
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -98,4 +100,10 @@ html {
   font-family: 'Jost-SemiBold';
   /* font-weight: 400; */
   src: url('./fonts/Jost/static/Jost-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Albert_Sans';
+  /* font-weight: 400; */
+  src: url('./fonts/Albert_Sans/AlbertSans-VariableFont_wght.ttf') format('truetype');
 }

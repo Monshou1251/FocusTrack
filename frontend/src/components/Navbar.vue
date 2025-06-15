@@ -1,20 +1,37 @@
 <template>
   <nav class="navbar" :class="{ 'dark-mode': isDarkMode }">
-    <div class="toggle-container" @click="toggleColorMode">
-      <div class="toggle">
-        <div class="toggle-inner">
-          <i class="icon" :class="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
+    <div class="left-panel" v-if="isAuthenticated">
+      <!-- Боковая панель для залогиненного -->
+      userinfo
+    </div>
+
+
+    <div class="right-block">
+
+      <div class="toggle-container" @click="toggleColorMode">
+        <div class="toggle">
+          <div class="toggle-inner">
+            <i class="icon" :class="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
+          </div>
         </div>
+        <span class="color_scheme">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
       </div>
-      <span>{{ isDarkMode ? 'Dark' : 'Light' }}</span>
+
+      <div class="exit-button" v-if="isAuthenticated">
+        <svg-icon type="mdi" :path="mdiPowerStandby"></svg-icon>
+      </div>
     </div>
   </nav>
 </template>
 
+
 <script setup>
-import { ref } from 'vue'
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiPowerStandby } from '@mdi/js';
+import { ref } from 'vue';
 
 const isDarkMode = ref(true)
+const isAuthenticated = ref(true)
 
 const toggleColorMode = () => {
   // Toggle dark mode
@@ -55,17 +72,28 @@ updateCSSVariables(isDarkMode.value)
 
 <style scoped>
 .navbar {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+  justify-content: space-between;
+  padding: 25px;
   background-color: var(--color-background);
   transition: background-color 0.3s ease-in-out;
-  font-family: 'Jost-Regular';
+  font-family: 'Albert_Sans';
   font-weight: 400;
+  font-size: 16px;
+}
+
+.left-panel {
+  display: flex;
+  align-items: center;
+}
+
+.right-block {
+  display: flex;
+  gap: 20px;
 }
 
 .toggle-container {
@@ -73,6 +101,23 @@ updateCSSVariables(isDarkMode.value)
   align-items: center;
   cursor: pointer;
 }
+
+.exit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-8);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background-mute);
+  width: 40px;
+  height: 40px;
+}
+
+.exit-button:hover {
+  border: 1px solid var(--color-border-hover);
+  cursor: pointer;
+}
+
 
 .toggle {
   width: 40px;
@@ -106,11 +151,8 @@ updateCSSVariables(isDarkMode.value)
 }
 
 .toggle-container span {
-  /* color: var(--color-text); */
-  /* font-weight: bold; */
   transition: color 0.3s ease-in-out;
-  font-family: 'Jost-SemiBold';
-  font-size: 16px;
+
 }
 
 .icon {
@@ -118,7 +160,7 @@ updateCSSVariables(isDarkMode.value)
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 14px; /* Adjust icon size */
+  font-size: 14px;
   margin-right: 10px;
 }
 
