@@ -5,7 +5,7 @@
 
   --vt-c-black: #181818;
   --vt-c-black-soft: #414141;
-  --vt-c-black-mute: #272727;
+  --vt-c-black-mute: #27272733;
 
   --vt-c-indigo: #2c3e50;
 
@@ -30,7 +30,7 @@
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
 
-  --color-border: var(--vt-c-divider-light-2);
+  --color-border: var(--vt-c-black-soft);
   --color-border-hover: var(--vt-c-divider-light-1);
 
   --color-heading: var(--vt-c-text-light-1);
@@ -106,4 +106,10 @@ html,
   font-family: 'Albert_Sans';
   /* font-weight: 400; */
   src: url('./fonts/Albert_Sans/AlbertSans-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Bruno_Ace';
+  /* font-weight: 400; */
+  src: url('./fonts/Bruno_Ace/BrunoAce-Regular.ttf') format('truetype');
 }
