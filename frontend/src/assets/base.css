@@ -24,7 +24,6 @@
   --hover-blue-light: #3a99ff;
 }
 
-/* semantic color variables for this project */
 :root {
   --color-background: var(--vt-c-black);
   --color-background-soft: var(--vt-c-white-soft);
@@ -47,7 +46,7 @@
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
 
-    --color-border: var(--vt-c-divider-dark-2);
+    --color-border: var(--vt-c-black-soft);
     --color-border-hover: var(--vt-c-divider-dark-1);
 
     --color-heading: var(--vt-c-text-dark-1);
@@ -86,8 +85,6 @@ html,
 @font-face {
   font-family: 'Jost';
   src: url('./fonts/Jost/Jost-VariableFont_wght.ttf') format('truetype');
-  /* url('path/to/font-file.ttf') format('ttf'); */
-  /* Add more src lines for other formats if needed */
 }
 
 @font-face {

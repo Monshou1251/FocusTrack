@@ -6,15 +6,7 @@
     <div class="content">
       <div class="cell performance">Performance</div>
       <div class="cell main-content">
-        <div>
-          <div>panels</div>
-        </div>
-        <div class="timer">
-          <span class="time-main">12:45</span>
-          <span class="time-ms">31</span>
-        </div>
-
-        <div>buttons</div>
+        <MainContent></MainContent>
       </div>
       <div class="cell spotify">spotify</div>
       <div class="cell categories">categories</div>
@@ -26,6 +18,7 @@
 
 
 <script setup>
+import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar.vue';
 </script>
 
@@ -58,7 +51,7 @@ import Navbar from '@/components/Navbar.vue';
 }
 
 .cell {
-  padding: 1rem;
+  padding: 10px;
   border-radius: 8px;
 }
 
@@ -69,28 +62,9 @@ import Navbar from '@/components/Navbar.vue';
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
 }
 
-.timer {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-family: 'Bruno_Ace', sans-serif;
-}
 
-.time-main {
-  font-size: 64px;
-  font-weight: 400;
-}
-
-.time-ms {
-  font-size: 36px;
-  /* Меньше основного времени */
-  font-weight: 500;
-  color: #999;
-  /* Можно сделать серым */
-}
 
 
 .calendar {
