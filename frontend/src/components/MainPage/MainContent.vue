@@ -4,13 +4,16 @@
         <div class="panels">
             <div class="panels-left">
                 <div>
-                    <AppButton text="Category" :iconLeft="mdiLogout" :withFilling="false" :noShadow="false" />
-
+                    <AppButton text="Category" :iconRight="mdiMenuDown" :iconLeft="mdiLogout" :withFilling="true"
+                        :noShadow="false" />
                 </div>
                 <div>
-                    <AppButton text="45" :iconRight="mdiMenuDown" :withFilling="false" :noShadow="false" />
+                    <AppButton text="45" :iconRight="mdiMenuDown" :withFilling="false" :noShadow="false" title="Pace" />
                 </div>
-                <div>Rest</div>
+                <div>
+                    <AppButton text="45" :iconLeft="false" :iconRight="mdiMenuDown" :withFilling="false"
+                        :noShadow="false" title="Rest" />
+                </div>
             </div>
             <div class="panels-right">
                 <div class="exit-button">
@@ -23,15 +26,17 @@
             <span class="time-ms">31</span>
         </div>
 
-        <div>
-            buttons
+        <div class="buttons">
+            <svg-icon class="button-icons" type="mdi" :path="mdiPlay"></svg-icon>
+            <svg-icon class="button-icons" type="mdi" :path="mdiStop"></svg-icon>
+            <svg-icon class="button-icons" type="mdi" :path="mdiAutorenew"></svg-icon>
         </div>
     </div>
 </template>
 
 <script setup>
 import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiArrowExpand, mdiLogout, mdiMenuDown } from '@mdi/js';
+import { mdiArrowExpand, mdiAutorenew, mdiLogout, mdiMenuDown, mdiPlay, mdiStop } from '@mdi/js';
 import AppButton from './AppButton.vue';
 
 
@@ -59,9 +64,13 @@ import AppButton from './AppButton.vue';
 .panels-left {
     display: flex;
     flex-direction: row;
+    gap: 17px;
 }
 
+
+
 .timer {
+    padding-left: 45px;
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -92,6 +101,33 @@ import AppButton from './AppButton.vue';
 
 .exit-button:hover {
     border: 1px solid var(--color-border-hover);
+    cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: var(--color-background-soft);
+    min-width: 200px;
+    height: 60px;
+    border-radius: var(--border-radius-8);
+    transform: translateY(-10px);
+
+}
+
+.button-icons {
+    height: 32px;
+    width: auto;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-icons:hover {
+    background-color: var(--color-background-soft);
+    transform: scale(1.05);
+    /* чуть увеличиваем */
     cursor: pointer;
 }
 </style>

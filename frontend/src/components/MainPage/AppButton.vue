@@ -1,13 +1,16 @@
 <template>
-    <button class="app-button" :class="[
-        withFilling ? 'filled' : 'ghost',
-        { 'no-shadow': noShadow }
-    ]">
-        <svg-icon type="mdi" v-if="iconLeft" :path="iconLeft" class="icon left" />
-        <span class="text">{{ text }}</span>
-        <svg-icon type="mdi" v-if="iconRight" :path="iconRight" class="icon right" />
-    </button>
-    text
+    <div class="button-main">
+
+        <button class="app-button" :class="[
+            withFilling ? 'filled' : 'ghost',
+            { 'no-shadow': noShadow }
+        ]">
+            <span v-if="iconLeft" class="category-color"></span>
+            <span class="text">{{ text }}</span>
+            <svg-icon type="mdi" v-if="iconRight" :path="iconRight" class="icon right" />
+        </button>
+        <span class="button-title" v-if="title">{{ title }}</span>
+    </div>
 </template>
 
 <script setup>
@@ -18,44 +21,49 @@ defineProps({
     iconLeft: { type: String, default: null },
     iconRight: { type: String, default: null },
     withFilling: { type: Boolean, default: true },
-    noShadow: { type: Boolean, default: false }
+    noShadow: { type: Boolean, default: false },
+    title: { type: String, default: '' }
 });
 </script>
 
 <style scoped>
+.button-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .app-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    padding: 6px 8px;
     border: none;
     border-radius: 8px;
-    /* font-size: 1rem; */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     height: 32px;
+    font-size: 14px;
+    color: var(--color-text);
 }
 
-/* Залитая кнопка */
 .filled {
     background-color: var(--color-background-soft);
-    color: var(--color-text);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--color-border);
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); */
 }
 
-/* Прозрачная кнопка с тенью и inset эффектом */
 .ghost {
     background-color: transparent;
-    color: var(--color-text);
-    box-shadow:
+
+    /* box-shadow:
         0px 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0px 1px 2px rgba(0, 0, 0, 0.3);
+        inset 0px 1px 2px rgba(0, 0, 0, 0.3); */
     border: 1px solid var(--color-border);
 }
 
-/* Без тени */
 .no-shadow {
     box-shadow: none !important;
 }
@@ -65,11 +73,25 @@ defineProps({
     height: 1.2em;
 }
 
-.icon.left {
-    margin-right: 0.4rem;
+.category-color {
+    background-color: var(--yellow);
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
 }
 
-.icon.right {
-    margin-left: 0.4rem;
+.button-title {
+    font-size: 14px;
+}
+
+.button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.app-button:hover {
+    border: 1px solid var(--color-border-hover);
+    cursor: pointer;
 }
 </style>

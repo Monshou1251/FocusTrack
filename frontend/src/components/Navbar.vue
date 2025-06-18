@@ -130,7 +130,7 @@ updateCSSVariables(isDarkMode.value)
 }
 
 .dark-mode .toggle {
-  background-color: #ffcd4b;
+  background-color: var(--yellow);
 }
 
 .toggle-inner {
