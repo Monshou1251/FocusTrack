@@ -27,8 +27,9 @@ import Navbar from '@/components/Navbar.vue';
   display: grid;
   grid-template-areas:
     "navbar"
+    "."
     "content";
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1rem 1fr;
   height: 100vh;
 }
 
@@ -43,7 +44,7 @@ import Navbar from '@/components/Navbar.vue';
     "performance main spotify"
     "categories calendar smth";
   grid-template-columns: 1fr 3fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 3fr 2fr;
   gap: 10px;
   padding: 1rem;
   padding-top: 0;

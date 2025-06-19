@@ -1,8 +1,11 @@
 <template>
   <nav class="navbar" :class="{ 'dark-mode': isDarkMode }">
     <div class="left-panel" v-if="isAuthenticated">
-      <!-- Боковая панель для залогиненного -->
-      userinfo
+      <div class="avatar">
+        <img :src="avatarUrl" alt="User avatar" />
+      </div>
+      <div>userinfo</div>
+      <div>date</div>
     </div>
 
 
@@ -28,46 +31,33 @@
 <script setup>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiPowerStandby } from '@mdi/js';
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-const isDarkMode = ref(true)
+const isDarkMode = ref(
+  localStorage.getItem('isDarkMode') === 'true' || false
+)
+
 const isAuthenticated = ref(true)
+const avatarUrl = ref('https://i.pravatar.cc/100?img=5')
+
+const applyTheme = (dark) => {
+  document.documentElement.classList.toggle('dark-mode', dark)
+  document.documentElement.classList.toggle('light-mode', !dark)
+}
 
 const toggleColorMode = () => {
-  // Toggle dark mode
   isDarkMode.value = !isDarkMode.value
-  // Update CSS variables
-  updateCSSVariables(isDarkMode.value)
 }
 
-const updateCSSVariables = (isDarkMode) => {
-  const root = document.documentElement
+watch(isDarkMode, (newVal) => {
+  localStorage.setItem('isDarkMode', String(newVal))
+  applyTheme(newVal)
+})
 
-  if (isDarkMode) {
-    // Dark mode CSS variables
-    root.style.setProperty('--color-background', 'var(--vt-c-black)')
-    root.style.setProperty('--color-background-soft', 'var(--vt-c-black-soft)')
-    root.style.setProperty('--color-background-mute', 'var(--vt-c-black-mute)')
-    root.style.setProperty('--color-border', 'var(--vt-c-divider-dark-2)')
-    root.style.setProperty('--color-border-hover', 'var(--vt-c-divider-dark-1)')
-    root.style.setProperty('--color-heading', 'var(--vt-c-text-dark-1)')
-    root.style.setProperty('--color-text', 'var(--vt-c-text-dark-1)')
-    root.style.setProperty('--color-button-hover', 'var(--hover-blue-dark)')
-  } else {
-    // Light mode CSS variables
-    root.style.setProperty('--color-background', 'var(--vt-c-white)')
-    root.style.setProperty('--color-background-soft', 'var(--vt-c-white-soft)')
-    root.style.setProperty('--color-background-mute', 'var(--vt-c-white-mute)')
-    root.style.setProperty('--color-border', 'var(--vt-c-divider-light-2)')
-    root.style.setProperty('--color-border-hover', 'var(--vt-c-divider-light-1)')
-    root.style.setProperty('--color-heading', 'var(--vt-c-text-light-1)')
-    root.style.setProperty('--color-text', 'var(--vt-c-text-light-1)')
-    root.style.setProperty('--color-button-hover', 'var(--hover-blue-light)')
-  }
-}
+onMounted(() => {
+  applyTheme(isDarkMode.value)
+})
 
-// Initialize CSS variables based on initial mode
-updateCSSVariables(isDarkMode.value)
 </script>
 
 <style scoped>
@@ -75,10 +65,10 @@ updateCSSVariables(isDarkMode.value)
   /* position: fixed; */
   top: 0;
   left: 0;
+  height: 100px;
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 25px;
   background-color: var(--color-background);
   transition: background-color 0.3s ease-in-out;
   font-family: 'Albert_Sans';
@@ -89,16 +79,44 @@ updateCSSVariables(isDarkMode.value)
 .left-panel {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  min-width: 400px;
+  background-color: var(--color-background-darkest);
+  padding: 0 27px;
+  border-bottom-right-radius: 8px;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.avatar {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .right-block {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 20px;
+  padding-right: 27px;
 }
 
 .toggle-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 

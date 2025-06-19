@@ -46,7 +46,16 @@ defineProps({
     transition: all 0.2s ease;
     height: 32px;
     font-size: 14px;
+    font-weight: 200;
     color: var(--color-text);
+    font-family: 'Albert_Sans';
+    /* --color-text */
+}
+
+.text {
+    /* color: var(--vt-c-text-dark-2); */
+    color: var(--color-text);
+    /* color: var(--color-text-mute); */
 }
 
 .filled {
@@ -90,8 +99,14 @@ defineProps({
     gap: 1rem;
 }
 
+.right {
+    width: 18px;
+    height: 18px;
+}
+
 .app-button:hover {
     border: 1px solid var(--color-border-hover);
     cursor: pointer;
+    color: var(--color-text);
 }
 </style>

@@ -59,6 +59,7 @@ import AppButton from './AppButton.vue';
     align-items: center;
     justify-content: space-between;
     padding: 8px;
+
 }
 
 .panels-left {
