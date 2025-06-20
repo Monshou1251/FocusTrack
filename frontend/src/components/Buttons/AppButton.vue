@@ -65,13 +65,10 @@ defineProps({
 }
 
 .ghost {
-    background-color: transparent;
-
-    /* box-shadow:
-        0px 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0px 1px 2px rgba(0, 0, 0, 0.3); */
+    background-color: var(--color-background-ghost);
     border: 1px solid var(--color-border);
 }
+
 
 .no-shadow {
     box-shadow: none !important;

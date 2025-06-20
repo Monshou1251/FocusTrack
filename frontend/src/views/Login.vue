@@ -9,23 +9,11 @@
         <div>
           <div class="form-group">
             <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
-            <input
-              type="email"
-              name="email"
-              v-model="email"
-              class="form-control"
-              placeholder="email"
-            />
+            <input type="email" name="email" v-model="email" class="form-control" placeholder="email" />
           </div>
           <div class="form-group">
             <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
-            <input
-              type="password"
-              name="password"
-              v-model="password"
-              class="form-control"
-              placeholder="password"
-            />
+            <input type="password" name="password" v-model="password" class="form-control" placeholder="password" />
           </div>
         </div>
         <div class="button-group">
@@ -46,14 +34,14 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'
+import Navbar from '@/components/Navbar/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
-import { mdiAt, mdiKeyVariant, mdiGoogle, mdiGithub} from '@mdi/js'
-import { ref } from 'vue'
+import { mdiAt, mdiGithub, mdiGoogle, mdiKeyVariant } from '@mdi/js'
 import axios from 'axios'
-import { useRouter } from 'vue-router';
-import { GoogleOAuthProvider } from 'google-oauth-gsi';
+import { GoogleOAuthProvider } from 'google-oauth-gsi'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter();
 
@@ -116,9 +104,9 @@ const signUp = async () => {
 
 
 const googleProvider = new GoogleOAuthProvider({
-    clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    onScriptLoadError: () => console.log('onScriptLoadError'),
-    onScriptLoadSuccess: () => console.log('onScriptLoadSuccess'),
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+  onScriptLoadError: () => console.log('onScriptLoadError'),
+  onScriptLoadSuccess: () => console.log('onScriptLoadSuccess'),
 });
 
 const handleGoogleLogin = googleProvider.useGoogleLogin({
@@ -150,7 +138,6 @@ document.addEventListener('mousemove', function (e) {
 </script>
 
 <style scoped>
-
 .container {
   display: flex;
   justify-content: center;
@@ -165,7 +152,8 @@ document.addEventListener('mousemove', function (e) {
   margin-bottom: 20%;
   /* border: solid 1px var(--color-border); */
   border-radius: 10px;
-  border-color: transparent; /* Start with transparent border */
+  border-color: transparent;
+  /* Start with transparent border */
   /* animation: borderFadeIn 4s ease forwards 6s; */
 }
 
@@ -185,16 +173,14 @@ document.addEventListener('mousemove', function (e) {
   /* animation:
     fadeIn 4s ease forwards 1s,
     moveAndResize 1s ease forwards 5s; */
-  background-image: linear-gradient(
-    to right,
-    orange,
-    rgb(0, 153, 255),
-    rgb(174, 0, 255),
-    rgb(255, 0, 170),
-    rgb(174, 0, 255),
-    #ffcd4b,
-    orange
-  );
+  background-image: linear-gradient(to right,
+      orange,
+      rgb(0, 153, 255),
+      rgb(174, 0, 255),
+      rgb(255, 0, 170),
+      rgb(174, 0, 255),
+      #ffcd4b,
+      orange);
   color: transparent;
   background-clip: text;
 }
@@ -273,7 +259,7 @@ input:-webkit-autofill {
   color: transparent;
 }
 
-.form-group:not(:placeholder-shown):focus + svg {
+.form-group:not(:placeholder-shown):focus+svg {
   display: none;
 }
 
@@ -330,13 +316,13 @@ button:hover {
   width: 40px;
   height: 40px;
   opacity: 0.4;
-  
+
 }
 
 .google-git-icons-item:hover {
   background-color: var(--color-background-mute);
   cursor: pointer;
-  transition: background-color  0.2s ease-in-out, opacity  0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
   opacity: 1;
 }
 
@@ -350,6 +336,7 @@ button:hover {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -359,6 +346,7 @@ button:hover {
   from {
     border-color: transparent;
   }
+
   to {
     border-color: var(--color-border);
   }
@@ -370,6 +358,7 @@ button:hover {
     font-size: 48px;
     font-weight: 800;
   }
+
   100% {
     font-size: 32px;
     font-weight: 600;

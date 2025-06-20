@@ -1,11 +1,7 @@
 <template>
   <nav class="navbar" :class="{ 'dark-mode': isDarkMode }">
     <div class="left-panel" v-if="isAuthenticated">
-      <div class="avatar">
-        <img :src="avatarUrl" alt="User avatar" />
-      </div>
-      <div>userinfo</div>
-      <div>date</div>
+      <ProfileInfo />
     </div>
 
 
@@ -33,12 +29,14 @@ import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiPowerStandby } from '@mdi/js';
 import { onMounted, ref, watch } from 'vue';
 
+import ProfileInfo from './ProfileInfo.vue';
+
 const isDarkMode = ref(
   localStorage.getItem('isDarkMode') === 'true' || false
 )
 
 const isAuthenticated = ref(true)
-const avatarUrl = ref('https://i.pravatar.cc/100?img=5')
+
 
 const applyTheme = (dark) => {
   document.documentElement.classList.toggle('dark-mode', dark)
@@ -89,21 +87,7 @@ onMounted(() => {
   border-right: 1px solid var(--color-border);
 }
 
-.avatar {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 .right-block {
   display: flex;

@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'
+import Navbar from '@/components/Navbar/Navbar.vue';
 </script>
 
 <style scoped>
@@ -30,6 +30,7 @@ import Navbar from '@/components/Navbar.vue'
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -38,13 +39,19 @@ import Navbar from '@/components/Navbar.vue'
 @keyframes moveAndResize {
   from {
     transform: translateY(0);
-    font-size: 48px; /* Initial font size */
-    font-weight: 800; /* Initial font weight */
+    font-size: 48px;
+    /* Initial font size */
+    font-weight: 800;
+    /* Initial font weight */
   }
+
   to {
-    transform: translateY(-300px); /* Move up by 300px */
-    font-size: 24px; /* Decrease font size */
-    font-weight: 400; /* Decrease font weight */
+    transform: translateY(-300px);
+    /* Move up by 300px */
+    font-size: 24px;
+    /* Decrease font size */
+    font-weight: 400;
+    /* Decrease font weight */
   }
 }
 </style>
