@@ -68,14 +68,13 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   align-items: center;
 }
 
-
-
-
 .calendar {
   border: 1px solid var(--color-border);
+
 }
 
 .categories {
-  border: 1px dashed var(--color-border);
+  border: 1.4px dashed var(--color-border);
+  padding: 0;
 }
 </style>

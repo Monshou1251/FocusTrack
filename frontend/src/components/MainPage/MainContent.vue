@@ -16,7 +16,7 @@
             </div>
             <div class="panels-right">
                 <div class="expand-button">
-                    <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" />
+                    <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md" />
                 </div>
             </div>
         </div>
@@ -170,8 +170,8 @@ onBeforeUnmount(() => {
 .time-seconds {
     position: absolute;
     /* top: 20px; */
-    bottom: 13px;
-    right: -75px;
+    bottom: 15px;
+    right: -60px;
     display: flex;
     gap: 0.25rem;
 }
@@ -193,16 +193,16 @@ onBeforeUnmount(() => {
 }
 
 .seconds {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 400;
     color: var(--color-text-mute);
-    width: 30px;
+    width: 23px;
     text-align: center;
 }
 
 .expand-button {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
 }
 
 .buttons {
@@ -228,37 +228,6 @@ onBeforeUnmount(() => {
 .button-icons:hover {
     background-color: var(--color-background-soft);
     transform: scale(1.05);
-    /* чуть увеличиваем */
     cursor: pointer;
-}
-
-.tooltip {
-    position: relative;
-    display: inline-block;
-    display: flex;
-}
-
-.tooltip::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 135%;
-    /* немного выше кнопки */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #333;
-    color: white;
-    padding: 6px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-    font-size: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 100;
-}
-
-.tooltip:hover::after {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-4px);
 }
 </style>
