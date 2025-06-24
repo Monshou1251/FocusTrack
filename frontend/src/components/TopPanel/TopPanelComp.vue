@@ -4,7 +4,7 @@
             {{ title }}
         </div>
         <div class="exit-button" v-show="showButton">
-            <ButtonOne :iconPath="mdiHelp" @clickEvent="callHelpWindow" size="xs" variant="secondary" />
+            <ButtonOne :iconPath="mdiHelp" size="xs" variant="secondary" @clickEvent="$emit('clickHelp')" />
         </div>
     </div>
 </template>
@@ -16,20 +16,20 @@ import ButtonOne from '../Buttons/ButtonOne.vue';
 defineProps({
     title: { type: String, default: 'Panel' },
     showButton: { type: Boolean, default: true },
-    iconPath: { type: String, required: true },
-    onClick: { type: Function, required: true }
 })
+
+defineEmits(['clickHelp'])
 
 </script>
 
 <style scoped>
-/* .top-panel {
+.top-panel {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     height: 20px;
-} */
+}
 
 .title {
     display: flex;

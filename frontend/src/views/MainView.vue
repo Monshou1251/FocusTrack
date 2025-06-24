@@ -12,7 +12,9 @@
       <div class="cell categories">
         <CategoriesComp />
       </div>
-      <div class="cell calendar">calendar</div>
+      <div class="cell calendar">
+        <CalendarComp />
+      </div>
       <div class="cell smth">smth</div>
     </div>
   </div>
@@ -20,6 +22,7 @@
 
 
 <script setup>
+import CalendarComp from '@/components/Calendar/CalendarComp.vue';
 import CategoriesComp from '@/components/Categories/CategoriesComp.vue';
 import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
@@ -44,9 +47,10 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   display: grid;
   grid-template-areas:
     "performance main spotify"
+    "categories main smth"
     "categories calendar smth";
   grid-template-columns: 1fr 3fr 1fr;
-  grid-template-rows: 3fr 2fr;
+  grid-template-rows: 1fr 1fr auto;
   gap: 10px;
   padding: 1rem;
   padding-top: 0;
@@ -54,12 +58,21 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   box-sizing: border-box;
 }
 
-.cell {
-  padding: 10px;
-  border-radius: 8px;
+.performance {
+  grid-area: performance;
 }
 
+.spotify {
+  grid-area: spotify;
+}
+
+.smth {
+  grid-area: smth;
+}
+
+
 .main-content {
+  grid-area: main;
   background-color: var(--color-background-mute);
   border: 1px solid var(--color-border);
   display: flex;
@@ -69,12 +82,19 @@ import Navbar from '@/components/Navbar/Navbar.vue';
 }
 
 .calendar {
-  border: 1px solid var(--color-border);
-
+  grid-area: calendar;
+  /* border: 1px solid var(--color-border); */
+  /* background-color: var(--color-background-mute); */
 }
 
 .categories {
+  grid-area: categories;
   border: 1.4px dashed var(--color-border);
   padding: 0;
+}
+
+.cell {
+  padding: 10px;
+  border-radius: 8px;
 }
 </style>

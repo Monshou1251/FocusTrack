@@ -41,7 +41,7 @@ const sizeClass = computed(() => {
 }
 
 .icon-button:hover {
-    border: 1px solid var(--color-text-mute);
+    border: 1px solid var(--color-border-hover);
     cursor: pointer;
 }
 

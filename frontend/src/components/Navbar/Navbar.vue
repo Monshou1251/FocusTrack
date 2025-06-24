@@ -113,6 +113,7 @@ onMounted(() => {
   background-color: var(--color-background-mute);
   width: 40px;
   height: 40px;
+  transition: border 0.2s ease, background-color 0.2s ease;
 }
 
 .exit-button:hover {

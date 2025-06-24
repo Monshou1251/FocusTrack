@@ -1,10 +1,7 @@
 <template>
     <div class="main-categories">
         <div>
-
-            <div class="top-panel">
-                <TopPanel title="categories" :showButton="true" :iconPath="mdiHelp" :onClick="callHelpWindow" />
-            </div>
+            <TopPanel title="categories" :showButton="true" @clickHelp="callHelpWindow" />
 
             <ul class="category-list">
                 <li v-for="(category, index) in categoriesList" :key="index" class="category-item"
@@ -45,6 +42,7 @@ import TopPanel from '../TopPanel/TopPanelComp.vue';
 
 
 const callHelpWindow = () => {
+    console.log('kekCategories')
     // TODO: вызов окна подсказки
 }
 
@@ -60,14 +58,16 @@ const editingIndex = ref(null)
 const editedText = ref('')
 
 const pastelColors = [
-    '#FFB3BA', // розовый
-    '#FFDFBA', // оранжевый
-    '#FFFFBA', // жёлтый
-    '#BAFFC9', // зелёный
-    '#BAE1FF', // голубой
-    '#D7BAFF', // фиолетовый
-    '#FFBAED', // розово-фиолетовый
-    '#C2F0FC'  // мятный
+    '#ffcd4b', // тёплый жёлтый (заменил #FFB900 на твой цвет)
+    '#FF6F61', // кораллово-красный
+    '#F58EA8', // мягкий розовый
+    '#6EC1E4', // голубой
+    '#42B883', // мятно-зелёный
+    '#A7D676', // светло-зелёный (замена жёлтому #FFE066)
+    '#A78BFA', // мягкий фиолетовый
+    '#80CBC4', // бирюзовый
+    '#FBC02D', // янтарный
+    '#F48FB1', // светло-розовый
 ]
 
 const addCategory = () => {
@@ -116,16 +116,8 @@ const cancelEditing = () => {
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
-    padding: 10px;
+    /* padding: 10px; */
     padding-bottom: 0;
-}
-
-.top-panel {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 20px;
 }
 
 /* Category List */
