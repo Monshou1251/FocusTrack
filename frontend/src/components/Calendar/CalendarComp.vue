@@ -1,7 +1,9 @@
 <template>
     <div class="calendar-main">
         <div class="top-panel">
-            <TopPanel title="overall activity" :showButton="true" @click-help="callHelpWindow" />
+            <!-- <TopPanel title="overall activity" :showButton="true" @click-help="callHelpWindow" /> -->
+            <div class="calendar-title-primary">Calendar</div>
+            <div class="calendar-title-secondary">Your yearly activity</div>
         </div>
         <div class="calendar-container">
             <calendar-heatmap dark-mode :values="activityData" :end-date="new Date().toISOString().slice(0, 10)"
@@ -19,7 +21,6 @@
 
 <script setup>
 import { CalendarHeatmap } from 'vue3-calendar-heatmap';
-import TopPanel from '../TopPanel/TopPanelComp.vue';
 
 
 const callHelpWindow = () => {
@@ -80,7 +81,18 @@ const activityData = [
 
 .top-panel {
     display: flex;
+    flex-direction: column;
+    line-height: 1.2;
     width: 100%;
+}
+
+.calendar-title-primary {
+    font-size: 14px;
+}
+
+.calendar-title-secondary {
+    font-size: 14px;
+    color: var(--color-text-mute);
 }
 
 .calendar-container {

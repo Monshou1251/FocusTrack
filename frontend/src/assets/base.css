@@ -13,6 +13,16 @@
 
   --vt-c-indigo: #2c3e50;
   --yellow: #ffcd4b;
+  --color-warm-yellow: #ffcd4b; /* тёплый жёлтый */
+  --color-coral-red: #ff6f61; /* кораллово-красный */
+  --color-soft-pink: #f58ea8; /* мягкий розовый */
+  --color-sky-blue: #6ec1e4; /* голубой */
+  --color-mint-green: #42b883; /* мятно-зелёный */
+  --color-light-green: #a7d676; /* светло-зелёный */
+  --color-soft-purple: #a78bfa; /* мягкий фиолетовый */
+  --color-turquoise: #80cbc4; /* бирюзовый */
+  --color-amber: #fbc02d; /* янтарный */
+  --color-light-pink: #f48fb1; /* светло-розовый */
 
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
   --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);

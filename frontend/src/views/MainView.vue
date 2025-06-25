@@ -50,7 +50,7 @@ import Navbar from '@/components/Navbar/Navbar.vue';
     "categories main smth"
     "categories calendar smth";
   grid-template-columns: 1fr 3fr 1fr;
-  grid-template-rows: 1fr 1fr auto;
+  grid-template-rows: 3fr 2fr auto;
   gap: 10px;
   padding: 1rem;
   padding-top: 0;
@@ -81,11 +81,7 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   align-items: center;
 }
 
-.calendar {
-  grid-area: calendar;
-  /* border: 1px solid var(--color-border); */
-  /* background-color: var(--color-background-mute); */
-}
+
 
 .categories {
   grid-area: categories;
@@ -96,5 +92,10 @@ import Navbar from '@/components/Navbar/Navbar.vue';
 .cell {
   padding: 10px;
   border-radius: 8px;
+}
+
+.calendar {
+  grid-area: calendar;
+  /* padding: 0; */
 }
 </style>

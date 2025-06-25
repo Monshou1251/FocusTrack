@@ -1,25 +1,16 @@
 <template>
     <div class="main">
-
         <div class="panels">
             <div class="panels-left">
-                <div>
-                    <AppButton text="Category" :iconRight="mdiMenuDown" :iconLeft="mdiLogout" :withFilling="true"
-                        :noShadow="false" />
-                </div>
-                <div>
-                    <AppButton text="45" :iconRight="mdiMenuDown" :withFilling="false" :noShadow="false" title="Pace" />
-                </div>
-                <div>
-                    <AppButton text="45" :iconRight="mdiMenuDown" :withFilling="false" :noShadow="false" title="Rest" />
-                </div>
+                <CategoriesButton :iconLeft="mdiLogout" :text="selectedCategory" />
+                <PaceButton :text="paceOptions" :iconRight="mdiMenuDown" :withFilling="false" title="Pace" />
+                <RestButton :text="restOptions" :iconRight="mdiMenuDown" :withFilling="false" title="Rest" />
             </div>
             <div class="panels-right">
-                <div class="expand-button">
-                    <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md" />
-                </div>
+                <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md" />
             </div>
         </div>
+
         <div class="timer">
             <div class="time-center">
                 <div class="digits">
@@ -31,7 +22,6 @@
                     <span class="digit">{{ minutesStr[0] }}</span>
                     <span class="digit">{{ minutesStr[1] }}</span>
                 </div>
-
                 <div class="time-seconds">
                     <span class="seconds">{{ secondsStr[0] }}</span>
                     <span class="seconds">{{ secondsStr[1] }}</span>
@@ -39,17 +29,13 @@
             </div>
         </div>
 
-
         <div class="buttons">
             <div class="tooltip" data-tooltip="Play / Pause">
-                <svg-icon class="button-icons" type="mdi" :path="isRunning ? mdiPause : mdiPlay"
-                    @click="isRunning ? pauseTimer() : startTimer()" />
+                <svg-icon class="button-icons" type="mdi" :path="isRunning ? mdiPause : mdiPlay" @click="toggleTimer" />
             </div>
-
             <div class="tooltip" data-tooltip="Stop and reset">
                 <svg-icon class="button-icons" type="mdi" :path="mdiStop" @click="stopTimer" />
             </div>
-
             <div class="tooltip" data-tooltip="Reset">
                 <svg-icon class="button-icons" type="mdi" :path="mdiAutorenew" @click="resetTimer" />
             </div>
@@ -58,71 +44,92 @@
 </template>
 
 <script setup>
+import { useCategoryStore } from '@/store/categories'
 import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiArrowExpand, mdiAutorenew, mdiLogout, mdiMenuDown, mdiPause, mdiPlay, mdiStop } from '@mdi/js'
-import AppButton from '../Buttons/AppButton.vue'
-import ButtonOne from '../Buttons/ButtonOne.vue'
-
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import ButtonOne from '../Buttons/ButtonOne.vue'
+import CategoriesButton from '../Buttons/CategoriesButton.vue'
+import PaceButton from '../Buttons/PaceButton.vue'
+import RestButton from '../Buttons/RestButton.vue'
 
-const milliseconds = ref(0)
 const isRunning = ref(false)
-let intervalId = null
+const startTime = ref(0)
+const elapsed = ref(0)
+const milliseconds = ref(0)
+let rafId = null
+const categoryStore = useCategoryStore()
+const selectedCategory = categoryStore.categories
 
-const toggleFullscreen = () => {
-    console.log("toggleFullscreen")
-    // TODO: Add expand, make main content area take the whole screen
+const paceOptions = [15, 30, 45, 60, 75, 90]
+const restOptions = [5, 10, 15, 20, 25, 30]
+
+const update = () => {
+    const now = performance.now()
+    milliseconds.value = elapsed.value + (now - startTime.value)
+    rafId = requestAnimationFrame(update)
 }
 
 const startTimer = () => {
     if (!isRunning.value) {
         isRunning.value = true
-        intervalId = setInterval(() => {
-            milliseconds.value += 10
-        }, 10)
+        startTime.value = performance.now()
+        update()
     }
 }
 
 const pauseTimer = () => {
-    isRunning.value = false
-    clearInterval(intervalId)
-    localStorage.setItem('timerMilliseconds', milliseconds.value.toString())
+    if (isRunning.value) {
+        isRunning.value = false
+        elapsed.value += performance.now() - startTime.value
+        cancelAnimationFrame(rafId)
+        localStorage.setItem('timerMilliseconds', milliseconds.value.toString())
+    }
+}
+
+const toggleTimer = () => {
+    isRunning.value ? pauseTimer() : startTimer()
 }
 
 const resetTimer = () => {
     pauseTimer()
     milliseconds.value = 0
+    elapsed.value = 0
     localStorage.removeItem('timerMilliseconds')
 }
 
 const stopTimer = () => {
     pauseTimer()
     console.log('TODO: send to backend', milliseconds.value)
-    milliseconds.value = 0
-    localStorage.removeItem('timerMilliseconds')
+    resetTimer()
 }
 
 const hours = computed(() => Math.floor(milliseconds.value / 3600000))
-const minutes = computed(() => Math.floor(milliseconds.value / 60000))
+const minutes = computed(() => Math.floor(milliseconds.value / 60000) % 60)
 const seconds = computed(() => Math.floor((milliseconds.value % 60000) / 1000))
 
 const hoursStr = computed(() => hours.value.toString().padStart(2, '0'))
 const minutesStr = computed(() => minutes.value.toString().padStart(2, '0'))
 const secondsStr = computed(() => seconds.value.toString().padStart(2, '0'))
 
+const toggleFullscreen = () => {
+    console.log("toggleFullscreen")
+    // Реализуй переход в полноэкранный режим здесь
+}
+
 onMounted(() => {
     const saved = localStorage.getItem('timerMilliseconds')
-    if (saved !== null && !isNaN(parseInt(saved))) {
-        milliseconds.value = parseInt(saved)
+    if (saved !== null && !isNaN(parseFloat(saved))) {
+        elapsed.value = parseFloat(saved)
+        milliseconds.value = elapsed.value
     }
 })
+
 onBeforeUnmount(() => {
-    clearInterval(intervalId)
-    if (milliseconds.value > 0) {
-        localStorage.setItem('timerMilliseconds', milliseconds.value.toString())
-    }
+    pauseTimer()
 })
 </script>
+
 
 
 <style scoped>
@@ -151,7 +158,10 @@ onBeforeUnmount(() => {
     gap: 17px;
 }
 
-
+.panels-right {
+    height: 30px;
+    width: 30px;
+}
 
 .timer {
     display: flex;

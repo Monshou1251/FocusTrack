@@ -1,13 +1,13 @@
 <template>
     <div class="main-categories">
         <div>
+
             <TopPanel title="categories" :showButton="true" @clickHelp="callHelpWindow" />
 
             <ul class="category-list">
-                <li v-for="(category, index) in categoriesList" :key="index" class="category-item"
+                <li v-for="(category, index) in categoryStore.categories" :key="index" class="category-item"
                     @mouseenter="hoveredIndex = index" @mouseleave="hoveredIndex = null">
-                    <div class="color-box" :style="{ backgroundColor: pastelColors[index % pastelColors.length] }">
-                    </div>
+                    <div class="color-box" :style="{ backgroundColor: categoryStore.getColorByIndex(index) }" />
 
                     <div class="category-name">
                         <input v-if="editingIndex === index" v-model="editedText" @keyup.enter="saveCategory(index)"
@@ -16,98 +16,68 @@
                     </div>
 
                     <div class="actions" v-show="hoveredIndex === index || editingIndex === index">
-                        <button class="action-btn" v-if="editingIndex === index"
-                            @click="saveCategory(index)">✔️</button>
-
-                        <button class="action-btn" v-else @click="editCategory(index)">✏️</button>
-
-                        <button class="action-btn" @click="deleteCategory(index)">🗑️</button>
+                        <button class="action-btn" v-if="editingIndex === index" @click="saveCategory(index)">
+                            ✔️
+                        </button>
+                        <button class="action-btn" v-else @click="editCategory(index)">
+                            ✏️
+                        </button>
+                        <button class="action-btn" @click="categoryStore.deleteCategory(index)">
+                            🗑️
+                        </button>
                     </div>
                 </li>
             </ul>
-
         </div>
-        <div class="bottom-panel" @click="addCategory">
+
+        <div class="bottom-panel" @click="categoryStore.addCategory()">
             <svg-icon type="mdi" :path="mdiPlusBoxOutline" />
             <div class="add-text">Add new category</div>
         </div>
     </div>
 </template>
 
-<script setup>
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiPlusBoxOutline } from '@mdi/js';
-import { ref } from 'vue';
-import TopPanel from '../TopPanel/TopPanelComp.vue';
 
+<script setup>
+import { useCategoryStore } from '@/store/categories'
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiPlusBoxOutline } from '@mdi/js'
+import { ref } from 'vue'
+import TopPanel from '../TopPanel/TopPanelComp.vue'
+
+const categoryStore = useCategoryStore()
 
 const callHelpWindow = () => {
     console.log('kekCategories')
-    // TODO: вызов окна подсказки
 }
 
 const vFocus = {
-    mounted: (el) => {
-        el.focus()
-    }
+    mounted: (el) => el.focus(),
 }
 
-const categoriesList = ref(['First', 'Second'])
 const hoveredIndex = ref(null)
 const editingIndex = ref(null)
 const editedText = ref('')
 
-const pastelColors = [
-    '#ffcd4b', // тёплый жёлтый (заменил #FFB900 на твой цвет)
-    '#FF6F61', // кораллово-красный
-    '#F58EA8', // мягкий розовый
-    '#6EC1E4', // голубой
-    '#42B883', // мятно-зелёный
-    '#A7D676', // светло-зелёный (замена жёлтому #FFE066)
-    '#A78BFA', // мягкий фиолетовый
-    '#80CBC4', // бирюзовый
-    '#FBC02D', // янтарный
-    '#F48FB1', // светло-розовый
-]
-
-const addCategory = () => {
-    if (categoriesList.value.length < pastelColors.length) {
-        categoriesList.value.push(`New category ${categoriesList.value.length + 1}`)
-    } else {
-        alert('Maximum 8 categories allowed.')
-    }
-}
-
-const deleteCategory = (index) => {
-    categoriesList.value.splice(index, 1)
-}
-
 const editCategory = (index) => {
     editingIndex.value = index
-    editedText.value = categoriesList.value[index]
+    editedText.value = categoryStore.categories[index]
 }
 
 const saveCategory = (index) => {
-    const trimmed = editedText.value.trim()
-
     if (editingIndex.value === null) return
-
-    if (trimmed && trimmed !== categoriesList.value[index]) {
-        categoriesList.value[index] = trimmed
+    const trimmed = editedText.value.trim()
+    if (trimmed && trimmed !== categoryStore.categories[index]) {
+        categoryStore.updateCategory(index, trimmed)
     }
-
     editingIndex.value = null
     editedText.value = ''
 }
-
 
 const cancelEditing = () => {
-    console.log('ESC pressed, canceling...')
     editingIndex.value = null
     editedText.value = ''
 }
-
-
 </script>
 
 <style scoped>
@@ -137,6 +107,8 @@ const cancelEditing = () => {
     border-radius: 6px;
     transition: background-color 0.3s;
     height: 35px;
+    gap: 5px;
+    /* font-size: 14px; */
 }
 
 .category-item:hover {
@@ -170,7 +142,7 @@ const cancelEditing = () => {
 }
 
 .edit-input {
-    font-size: 15px;
+    font-size: 16px;
     padding: 0;
     margin: 0;
     border: none;
