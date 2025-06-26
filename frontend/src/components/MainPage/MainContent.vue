@@ -12,21 +12,20 @@
         </div>
 
         <div class="timer">
-            <div class="time-center">
-                <div class="digits">
-                    <span class="digit">{{ hoursStr[0] }}</span>
-                    <span class="digit">{{ hoursStr[1] }}</span>
-                </div>
-                <span class="separator">:</span>
+            <div class="time-center" :class="mode == 'focus' ? null : 'rest-timer'">
                 <div class="digits">
                     <span class="digit">{{ minutesStr[0] }}</span>
                     <span class="digit">{{ minutesStr[1] }}</span>
                 </div>
-                <div class="time-seconds">
-                    <span class="seconds">{{ secondsStr[0] }}</span>
-                    <span class="seconds">{{ secondsStr[1] }}</span>
+                <span class="separator">:</span>
+                <div class="digits">
+                    <span class="digit">{{ secondsStr[0] }}</span>
+                    <span class="digit">{{ secondsStr[1] }}</span>
                 </div>
             </div>
+            <!-- <div class="rest-timer">
+                Rest timer
+            </div> -->
         </div>
 
         <div class="buttons">
@@ -45,46 +44,70 @@
 
 <script setup>
 import { useCategoryStore } from '@/store/categories'
+import { useTimerStore } from '@/store/timer'
 import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiArrowExpand, mdiAutorenew, mdiLogout, mdiMenuDown, mdiPause, mdiPlay, mdiStop } from '@mdi/js'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ButtonOne from '../Buttons/ButtonOne.vue'
 import CategoriesButton from '../Buttons/CategoriesButton.vue'
 import PaceButton from '../Buttons/PaceButton.vue'
 import RestButton from '../Buttons/RestButton.vue'
 
 const isRunning = ref(false)
-const startTime = ref(0)
+const startTimestamp = ref(0)
 const elapsed = ref(0)
-const milliseconds = ref(0)
-let rafId = null
+
 const categoryStore = useCategoryStore()
 const selectedCategory = categoryStore.categories
 
-const paceOptions = [15, 30, 45, 60, 75, 90]
-const restOptions = [5, 10, 15, 20, 25, 30]
+const timerStore = useTimerStore()
+const paceOptions = timerStore.paceOptions
+const restOptions = timerStore.restOptions
+const currentPace = computed(() => timerStore.currentPace)
+const paceLimitMs = computed(() => currentPace.value * 60 * 1000)
+
+const currentRest = computed(() => timerStore.currentRest)
+const restLimitMs = computed(() => currentRest.value * 60 * 1000)
+
+
+const mode = ref('focus')
+const limitMs = computed(() =>
+    mode.value === 'focus'
+        ? timerStore.currentPace * 60 * 1000
+        : timerStore.currentRest * 60 * 1000
+)
+
+const remainingTime = ref(paceLimitMs.value)
 
 const update = () => {
-    const now = performance.now()
-    milliseconds.value = elapsed.value + (now - startTime.value)
-    rafId = requestAnimationFrame(update)
+    const passed = Date.now() - startTimestamp.value
+    remainingTime.value = Math.max(limitMs.value - passed, 0)
+
+    if (remainingTime.value <= 0) {
+        pauseTimer()
+
+        if (mode.value === "focus") {
+            mode.value = "rest"
+            remainingTime.value = restLimitMs.value
+        } else {
+            mode.value = "focus"
+            remainingTime.value = paceLimitMs.value
+        }
+    }
 }
+
+let intervalId = null
 
 const startTimer = () => {
     if (!isRunning.value) {
         isRunning.value = true
-        startTime.value = performance.now()
-        update()
+        startTimestamp.value = Date.now()
+        intervalId = setInterval(update, 500)
     }
 }
-
 const pauseTimer = () => {
-    if (isRunning.value) {
-        isRunning.value = false
-        elapsed.value += performance.now() - startTime.value
-        cancelAnimationFrame(rafId)
-        localStorage.setItem('timerMilliseconds', milliseconds.value.toString())
-    }
+    isRunning.value = false
+    clearInterval(intervalId)
 }
 
 const toggleTimer = () => {
@@ -93,35 +116,38 @@ const toggleTimer = () => {
 
 const resetTimer = () => {
     pauseTimer()
-    milliseconds.value = 0
-    elapsed.value = 0
-    localStorage.removeItem('timerMilliseconds')
+    remainingTime.value = paceLimitMs.value
 }
 
 const stopTimer = () => {
     pauseTimer()
-    console.log('TODO: send to backend', milliseconds.value)
     resetTimer()
 }
 
-const hours = computed(() => Math.floor(milliseconds.value / 3600000))
-const minutes = computed(() => Math.floor(milliseconds.value / 60000) % 60)
-const seconds = computed(() => Math.floor((milliseconds.value % 60000) / 1000))
+const minutesStr = computed(() => {
+    const mins = Math.floor(remainingTime.value / 60000)
+    return mins.toString().padStart(2, '0')
+})
 
-const hoursStr = computed(() => hours.value.toString().padStart(2, '0'))
-const minutesStr = computed(() => minutes.value.toString().padStart(2, '0'))
-const secondsStr = computed(() => seconds.value.toString().padStart(2, '0'))
+const secondsStr = computed(() => {
+    const secs = Math.floor((remainingTime.value % 60000) / 1000)
+    return secs.toString().padStart(2, '0')
+})
 
 const toggleFullscreen = () => {
     console.log("toggleFullscreen")
-    // Реализуй переход в полноэкранный режим здесь
+    // TODO: переход в полноэкранный режим здесь
 }
+
+watch(currentPace, (newVal) => {
+    pauseTimer()
+    remainingTime.value = newVal * 60 * 1000
+})
 
 onMounted(() => {
     const saved = localStorage.getItem('timerMilliseconds')
     if (saved !== null && !isNaN(parseFloat(saved))) {
         elapsed.value = parseFloat(saved)
-        milliseconds.value = elapsed.value
     }
 })
 
@@ -168,6 +194,12 @@ onBeforeUnmount(() => {
     justify-content: center;
     position: relative;
     font-family: 'Bruno_Ace', sans-serif;
+}
+
+.rest-timer {
+    /* position: absolute;
+    top: 100px; */
+    color: var(--yellow);
 }
 
 .time-center {

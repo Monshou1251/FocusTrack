@@ -23,9 +23,6 @@
 import { CalendarHeatmap } from 'vue3-calendar-heatmap';
 
 
-const callHelpWindow = () => {
-    console.log('Kek')
-}
 
 const activityData = [
     { date: '2024-07-01', count: 2 },

@@ -3,14 +3,12 @@
         <div>
             <button class="app-button" :class="[withFilling ? 'filled' : 'ghost', { 'no-shadow': noShadow }]"
                 @click="toggleDropdown">
-                <span v-if="iconLeft" class="category-color" :style="{ backgroundColor: currentColor }" />
                 <span class="text">{{ selectedText || "Create category first" }}</span>
                 <svg-icon type="mdi" v-if="iconRight" :path="iconRight" class="icon right" />
             </button>
 
             <ul v-if="dropdownOpen" class="dropdown">
                 <li v-for="(item, index) in props.text" :key="index" class="dropdown-item" @click="selectItem(item)">
-                    <span v-if="colorBox" class="color-dot" :style="{ backgroundColor: getColor(index) }" />
                     {{ item }}
                 </li>
             </ul>
@@ -22,20 +20,19 @@
 
 
 <script setup>
-import { useCategoryStore } from '@/store/categories'
+import { useTimerStore } from '@/store/timer'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
     text: { type: Array, required: true },
-    iconLeft: { type: String, default: null },
     iconRight: { type: String, default: null },
     withFilling: { type: Boolean, default: true },
     noShadow: { type: Boolean, default: false },
     title: { type: String, default: '' },
-    colorBox: { type: Boolean, default: false }
 })
 
+const timerStore = useTimerStore()
 
 const dropdownOpen = ref(false)
 const selectedText = ref(
@@ -43,15 +40,6 @@ const selectedText = ref(
 )
 const dropdownRef = ref(null)
 
-const categoryStore = useCategoryStore()
-const getColor = categoryStore.getColorByIndex
-
-const currentIndex = computed(() =>
-    selectedText.value ? categoryStore.categories.indexOf(selectedText.value) : -1
-)
-const currentColor = computed(() =>
-    currentIndex.value >= 0 ? getColor(currentIndex.value) : '#ccc'
-)
 
 watch(() => props.text, (newVal) => {
     selectedText.value = newVal
@@ -67,10 +55,11 @@ const closeDropdown = () => {
 
 const selectItem = (item) => {
     selectedText.value = item
+    timerStore.currentPace = item
+    console.log("timerStore.currentPace: ", timerStore.currentPace)
     closeDropdown()
 }
 
-// Закрыть по клику вне
 const handleClickOutside = (e) => {
     if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
         closeDropdown()
@@ -84,7 +73,6 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 <style scoped>
 .button-main {
     position: relative;
-    /* чтобы .dropdown позиционировался относительно этой обёртки */
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -98,6 +86,7 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
     justify-content: center;
     gap: 0.5rem;
     padding: 6px 8px;
+    padding-left: 12px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -144,17 +133,9 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
     color: var(--color-text-mute);
 }
 
-.color-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
 
 .text {
-    /* color: var(--vt-c-text-dark-2); */
     color: var(--color-text);
-    /* color: var(--color-text-mute); */
 }
 
 .filled {
@@ -176,22 +157,6 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 .icon {
     width: 1.2em;
     height: 1.2em;
-}
-
-.category-color {
-    width: 18px;
-    height: 18px;
-    border-radius: 6px;
-}
-
-.button-title {
-    font-size: 14px;
-}
-
-.button-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
 }
 
 .right {
