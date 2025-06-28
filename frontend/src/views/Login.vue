@@ -6,28 +6,30 @@
         <h1 class="text">FocusTrack</h1>
       </div>
       <div class="input-main">
-        <div>
-          <div class="form-group">
-            <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
-            <input type="email" name="email" v-model="email" class="form-control" placeholder="email" />
+        <form @submit.prevent="signIn">
+          <div>
+            <div class="form-group">
+              <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
+              <input type="email" name="email" v-model="email" class="form-control" placeholder="email" />
+            </div>
+            <div class="form-group">
+              <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
+              <input type="password" name="password" v-model="password" class="form-control" placeholder="password" />
+            </div>
           </div>
-          <div class="form-group">
-            <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
-            <input type="password" name="password" v-model="password" class="form-control" placeholder="password" />
+          <div class="button-group">
+            <button type="submit" class="button-signin" @click="signIn">Sign in</button>
+            <button type="submit" class="button-signup" @click="signUp">Sign up</button>
           </div>
-        </div>
-        <div class="button-group">
-          <button type="submit" class="button-signin" @click="signIn">Sign in</button>
-          <button type="submit" class="button-signup" @click="signUp">Sign up</button>
-        </div>
-        <div class="google-git-icons">
-          <div class="google-git-icons-item" title="Login with Google">
-            <svg-icon type="mdi" :path="mdiGoogle" @click="handleGoogleLogin"></svg-icon>
+          <div class="google-git-icons">
+            <div class="google-git-icons-item" title="Login with Google">
+              <svg-icon type="mdi" :path="mdiGoogle" @click="handleGoogleLogin"></svg-icon>
+            </div>
+            <div class="google-git-icons-item" title="Login with Github">
+              <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
+            </div>
           </div>
-          <div class="google-git-icons-item" title="Login with Github">
-            <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   </div>
@@ -37,11 +39,15 @@
 import Navbar from '@/components/Navbar/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
+import { useAuthStore } from '@/store/auth'
 import { mdiAt, mdiGithub, mdiGoogle, mdiKeyVariant } from '@mdi/js'
 import axios from 'axios'
 import { GoogleOAuthProvider } from 'google-oauth-gsi'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+
+const authStore = useAuthStore()
 
 const router = useRouter();
 
@@ -60,10 +66,10 @@ const signIn = async () => {
     console.log(data)
 
     if (data.success) {
-      alert("✅ Successfully signed in!")
-      // router.push({ name: 'home' })
+      await authStore.fetchCurrentUser()
+      router.push('/main')
     } else {
-      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed11"))
+      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
     }
 
   } catch (error) {
@@ -139,22 +145,19 @@ document.addEventListener('mousemove', function (e) {
 
 <style scoped>
 .container {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  height: 100vh;
   width: 100%;
+  padding-bottom: 80px;
 }
 
 .container-wrapper {
   padding: 30px;
-  margin-bottom: 20%;
-  /* border: solid 1px var(--color-border); */
   border-radius: 10px;
   border-color: transparent;
-  /* Start with transparent border */
-  /* animation: borderFadeIn 4s ease forwards 6s; */
 }
 
 .text-container {

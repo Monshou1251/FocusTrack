@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -48,25 +47,29 @@ class JWTTokenService(TokenService):
 
 
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    access_token: str = Cookie(None),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Not authenticated!")
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("")
+        print("payload")
+        print(payload)
+        print("")
         email = payload.get("sub")
-        if email is None:
-            raise credentials_exception
+        print("email")
+        print(email)
+        if not email:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Invalid token")
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalars().first()
     if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="User not found")
+
     return user

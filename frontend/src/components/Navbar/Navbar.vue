@@ -1,9 +1,8 @@
 <template>
   <nav class="navbar" :class="{ 'dark-mode': isDarkMode }">
-    <div class="left-panel" v-if="isAuthenticated">
+    <div class="left-panel" :class="{ hidden: !isAuthenticated }">
       <ProfileInfo />
     </div>
-
 
     <div class="right-block">
 
@@ -16,7 +15,7 @@
         <span class="color_scheme">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
       </div>
 
-      <div class="exit-button" v-if="isAuthenticated">
+      <div class="exit-button" :class="{ hidden: !isAuthenticated }" @click="handleLogout">
         <svg-icon type="mdi" :path="mdiPowerStandby"></svg-icon>
       </div>
     </div>
@@ -25,17 +24,28 @@
 
 
 <script setup>
+import { useAuthStore } from '@/store/auth';
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiPowerStandby } from '@mdi/js';
 import { onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import ProfileInfo from './ProfileInfo.vue';
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
+}
 
 const isDarkMode = ref(
   localStorage.getItem('isDarkMode') === 'true' || false
 )
 
-const isAuthenticated = ref(true)
+// const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isAuthenticated = authStore.isAuthenticated
 
 
 const applyTheme = (dark) => {
@@ -46,6 +56,9 @@ const applyTheme = (dark) => {
 const toggleColorMode = () => {
   isDarkMode.value = !isDarkMode.value
 }
+
+
+
 
 watch(isDarkMode, (newVal) => {
   localStorage.setItem('isDarkMode', String(newVal))
@@ -95,6 +108,12 @@ onMounted(() => {
   justify-content: center;
   gap: 20px;
   padding-right: 27px;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .toggle-container {

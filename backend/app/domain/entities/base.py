@@ -20,6 +20,10 @@ class Entity[T: ValueObject](ABC):
 
     id_: T
 
+    @property
+    def id(self) -> T:
+        return self.id_
+
     def __setattr__(self, name: str, value: Any) -> None:
         """
         Prevents modifying the `id` after it's set.

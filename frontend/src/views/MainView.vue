@@ -97,5 +97,6 @@ import Navbar from '@/components/Navbar/Navbar.vue';
 .calendar {
   grid-area: calendar;
   /* padding: 0; */
+
 }
 </style>

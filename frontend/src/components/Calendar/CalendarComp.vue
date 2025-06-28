@@ -1,11 +1,16 @@
 <template>
     <div class="calendar-main">
         <div class="top-panel">
-            <!-- <TopPanel title="overall activity" :showButton="true" @click-help="callHelpWindow" /> -->
             <div class="calendar-title-primary">Calendar</div>
-            <div class="calendar-title-secondary">Your yearly activity</div>
+            <div class="calendar-title-secondary">Your {{ mode }} activity</div>
+
+            <div class="calendar-switch">
+                <button :class="{ active: mode === 'year' }" @click="mode = 'year'">Year</button>
+                <button :class="{ active: mode === 'week' }" @click="mode = 'week'">Week</button>
+            </div>
         </div>
-        <div class="calendar-container">
+
+        <div class="calendar-container" v-if="mode === 'year'">
             <calendar-heatmap dark-mode :values="activityData" :end-date="new Date().toISOString().slice(0, 10)"
                 :round="2" :range-color="[
                     'var(--color-background-mute-2)',
@@ -16,13 +21,19 @@
                     'hsla(150, 30%, 25%, 0.8)'
                 ]" />
         </div>
+
+        <div v-else>
+            <WeeklyChart />
+        </div>
     </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { CalendarHeatmap } from 'vue3-calendar-heatmap';
+import WeeklyChart from './WeeklyChart.vue';
 
-
+const mode = ref('year')
 
 const activityData = [
     { date: '2024-07-01', count: 2 },
@@ -72,8 +83,30 @@ const activityData = [
 .calendar-main {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    min-height: 250px;
+    /* или auto, но с transition */
+    transition: all 0.3s ease;
+}
+
+.calendar-switch {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.calendar-switch button {
+    padding: 4px 12px;
+    border: none;
+    background: #ddd;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.calendar-switch button.active {
+    background: #42b883;
+    color: white;
 }
 
 .top-panel {

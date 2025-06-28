@@ -4,8 +4,8 @@
             <img :src="avatarUrl" alt="User avatar" />
         </div>
         <div class="userinfo">
-            <div class="username">John Doe</div>
-            <div class="email">john@example.com</div>
+            <div class="username">{{ username }}</div>
+            <div class="email">{{ email }}</div>
         </div>
         <div class="date">
             <div class="day">{{ day }}</div>
@@ -18,10 +18,16 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/store/auth';
 import { onMounted, ref } from 'vue';
 
 
-const avatarUrl = ref('https://i.pravatar.cc/100?img=5')
+const authStore = useAuthStore()
+
+const username = authStore.username
+const email = authStore.email
+const avatarUrl = authStore.avatarUrl
+
 const day = ref('')
 const month = ref('')
 const weekday = ref('')

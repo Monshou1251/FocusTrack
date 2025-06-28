@@ -23,9 +23,9 @@
                     <span class="digit">{{ secondsStr[1] }}</span>
                 </div>
             </div>
-            <!-- <div class="rest-timer">
-                Rest timer
-            </div> -->
+            <div v-show="mode == 'rest'" class="rest-signal">
+                Rest time
+            </div>
         </div>
 
         <div class="buttons">
@@ -102,7 +102,7 @@ const startTimer = () => {
     if (!isRunning.value) {
         isRunning.value = true
         startTimestamp.value = Date.now()
-        intervalId = setInterval(update, 500)
+        intervalId = setInterval(update, 100)
     }
 }
 const pauseTimer = () => {
@@ -196,10 +196,18 @@ onBeforeUnmount(() => {
     font-family: 'Bruno_Ace', sans-serif;
 }
 
+
 .rest-timer {
     /* position: absolute;
     top: 100px; */
     color: var(--yellow);
+}
+
+.rest-signal {
+    position: absolute;
+    top: 100px;
+    color: var(--yellow);
+    font-size: 18px;
 }
 
 .time-center {

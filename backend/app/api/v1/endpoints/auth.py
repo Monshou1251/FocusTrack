@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import (
@@ -20,9 +20,8 @@ from app.core.interfaces import (
     UserRepository,
 )
 from app.core.responses import error_response, success_response
-
-# from app.core.security import get_current_user
-# from app.db.models.user import User
+from app.core.security import get_current_user
+from app.db.models.user import User as DBUser
 from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
@@ -33,6 +32,7 @@ from app.domain.services.auth_service import (
     register_user,
 )
 from app.schemas.auth import EmailLoginForm, EmailRegisterForm
+from app.schemas.user import UserOut
 
 router = APIRouter()
 
@@ -71,6 +71,7 @@ async def login(
     log_publisher: LogPublisher = Depends(get_log_publisher),
 ) -> JSONResponse:
     client_ip = request.client.host if request and request.client else "unknown"
+
     try:
         token_data = await authenticate_user(
             form_data=form_data,
@@ -80,8 +81,18 @@ async def login(
             client_ip=client_ip,
             log_publisher=log_publisher,
         )
-
-        return success_response("Authenticated successfully", data=token_data)
+        response = success_response(
+            "Authenticated successfully", data={"user": token_data["user"]}
+        )
+        response.set_cookie(
+            key="access_token",
+            value=token_data["access_token"],
+            httponly=True,
+            # secure=True,
+            samesite="Lax",
+            max_age=60 * 60 * 24 * 7,
+        )
+        return response
 
     except InvalidCredentialsError as e:
         return error_response(str(e), status_code=401)
@@ -113,6 +124,17 @@ async def auth_google(
         return error_response("OAuth authentication failed", status_code=400)
 
 
-# @router.get("/me")
-# async def protected_route(current_user: User = Depends(get_current_user)):
-#     return {"message": f"Hello, {current_user.email}"}
+@router.get("/me", response_model=UserOut)
+async def get_me(current_user: DBUser = Depends(get_current_user)) -> UserOut:
+    return UserOut(
+        id=int(current_user.id),
+        email=current_user.email,
+        username=current_user.username if current_user.username else None,
+        avatar_url=str(current_user.avatar_url) if current_user.avatar_url else None,
+    )
+
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"message": "Logged out"}

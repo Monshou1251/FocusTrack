@@ -7,12 +7,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+axios.defaults.baseURL = 'http://localhost:8000'
+axios.defaults.withCredentials = true
 
 const app = createApp(App)
 const pinia = createPinia()
 
-app.use(pinia) // 👈 добавляем pinia
+app.use(pinia)
 
 app.use(router)
 

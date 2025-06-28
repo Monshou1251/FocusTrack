@@ -33,6 +33,7 @@ async def register_user(
 ):
     email = form_data.email
     password = form_data.password
+    # avatar_url = form_data.avatar_url or "https://example.com/default-avatar.png"
 
     error_message = None
     success = False
@@ -77,30 +78,40 @@ async def authenticate_user(
 ):
     user = await user_repo.get_user_by_email(form_data.email)
 
-    success = False
-    token = None
-    error_message = None
-
-    if user and hasher.verify(form_data.password, user.hashed_password):
-        success = True
-        token = token_service.create_token({"sub": str(user.email)})
-    else:
-        error_message = "Incorrect email or password"
+    if user is None or not hasher.verify(form_data.password, user.hashed_password):
+        asyncio.create_task(
+            log_auth_attempt(
+                log_publisher=log_publisher,
+                email=form_data.email,
+                success=False,
+                ip=client_ip,
+                error="Incorrect email or password",
+            )
+        )
+        raise InvalidCredentialsError()
 
     asyncio.create_task(
         log_auth_attempt(
             log_publisher=log_publisher,
             email=form_data.email,
-            success=success,
+            success=True,
             ip=client_ip,
-            error=error_message,
+            error=None,
         )
     )
 
-    if not success:
-        raise InvalidCredentialsError()
+    token = token_service.create_token({"sub": user.email.value})
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id_.value,
+            "email": str(user.email.value),
+            "username": str(user.username.value) if user.username else None,
+            "avatar_url": str(user.avatar_url.value) if user.avatar_url else None,
+        },
+    }
 
 
 async def authenticate_oauth_user(
@@ -162,8 +173,13 @@ async def authenticate_oauth_user(
             )
         )
 
-    return {"access_token": token, "token_type": "bearer"}
-
-
-async def get_current_user(token):
-    pass
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id.value,
+            "email": user.email,
+            "username": user.username,
+            "avatar_url": user.avatar_url,
+        },
+    }

@@ -28,6 +28,9 @@ class Email(ValueObject):
         if not re.match(pattern, self.value):
             raise ValueError(f"Invalid email format: {self.value}")
 
+    def __str__(self) -> str:
+        return self.value
+
 
 @dataclass(frozen=True, repr=False)
 class Username(ValueObject):
@@ -41,13 +44,15 @@ class Username(ValueObject):
 
 @dataclass(frozen=True, repr=False)
 class AvatarUrl(ValueObject):
-    value: str
+    value: str | None
 
     def __post_init__(self):
         super().__post_init__()
+        if self.value is None:
+            return
         parsed = urlparse(self.value)
         if not (parsed.scheme and parsed.netloc):
             raise ValueError(f"Invalid URL format: {self.value}")
 
     def __str__(self):
-        return self.value
+        return self.value or ""
