@@ -107,9 +107,9 @@ async def authenticate_user(
         "token_type": "bearer",
         "user": {
             "id": user.id_.value,
-            "email": str(user.email.value),
-            "username": str(user.username.value) if user.username else None,
-            "avatar_url": str(user.avatar_url.value) if user.avatar_url else None,
+            "email": user.email.value,
+            "username": user.username.value if user.username else None,
+            "avatar_url": user.avatar_url.value if user.avatar_url else None,
         },
     }
 
@@ -178,8 +178,8 @@ async def authenticate_oauth_user(
         "token_type": "bearer",
         "user": {
             "id": user.id.value,
-            "email": user.email,
-            "username": user.username,
-            "avatar_url": user.avatar_url,
+            "email": user.email.value,
+            "username": user.username.value,
+            "avatar_url": user.avatar_url.value if user.avatar_url else None,
         },
     }

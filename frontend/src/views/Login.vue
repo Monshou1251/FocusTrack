@@ -1,5 +1,6 @@
 <template>
   <Navbar />
+  <Spinner v-if="isLoading" />
   <div class="container">
     <div class="container-wrapper">
       <div class="text-container">
@@ -18,7 +19,7 @@
             </div>
           </div>
           <div class="button-group">
-            <button type="submit" class="button-signin" @click="signIn">Sign in</button>
+            <button type="submit" class="button-signin">Sign in</button>
             <button type="submit" class="button-signup" @click="signUp">Sign up</button>
           </div>
           <div class="google-git-icons">
@@ -39,6 +40,7 @@
 import Navbar from '@/components/Navbar/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
+import Spinner from '@/components/helpers/Spinner.vue'
 import { useAuthStore } from '@/store/auth'
 import { mdiAt, mdiGithub, mdiGoogle, mdiKeyVariant } from '@mdi/js'
 import axios from 'axios'
@@ -54,7 +56,10 @@ const router = useRouter();
 const email = ref("")
 const password = ref("")
 
+const isLoading = ref(false)
+
 const signIn = async () => {
+  isLoading.value = true
   try {
     const form = new FormData()
     form.append('email', email.value)
@@ -63,24 +68,30 @@ const signIn = async () => {
     const response = await axios.post('/api/auth/login', form)
     const data = response.data
 
-    console.log(data)
-
     if (data.success) {
-      await authStore.fetchCurrentUser()
-      router.push('/main')
+      try {
+        await authStore.fetchCurrentUser()
+        router.push('/main')
+      } catch (e) {
+        console.error("❌ fetchCurrentUser failed:", e)
+        alert("❌ Ошибка при получении данных пользователя")
+      }
     } else {
       alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
     }
 
   } catch (error) {
     const errData = error.response?.data
-    const errMsg = errData?.message ?? "Login failed"
+    const errMsg = errData?.message ?? "Login failed11"
     alert("❌ " + errMsg)
+  } finally {
+    isLoading.value = false
   }
 }
 
 
 const signUp = async () => {
+  isLoading.value = true
   if (!email.value.trim() || !password.value.trim()) {
     alert("❌ Please enter both email and password.")
     return
@@ -105,6 +116,8 @@ const signUp = async () => {
     const errMsg = errData?.message ?? "Registration failed2"
     alert("❌ " + errMsg)
     console.error("Registration error:", error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -120,12 +133,22 @@ const handleGoogleLogin = googleProvider.useGoogleLogin({
   onSuccess: async (res) => {
     console.log('Logged in with Google', res);
     try {
+      isLoading.value = true
       const response = await axios.post('/api/auth/google_auth', res);
+      const data = response.data
+
+      if (data.success) {
+        await authStore.fetchCurrentUser()
+        router.push('/main')
+      } else {
+        alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
+      }
       console.log('✅ Auth success:', response.data);
-      alert('✅ Успешный вход через Google!');
     } catch (e) {
       console.error('❌ Auth error:', e);
       alert('❌ Ошибка при входе через Google.');
+    } finally {
+      isLoading.value = false
     }
   },
   onError: (err) => {
@@ -170,20 +193,17 @@ document.addEventListener('mousemove', function (e) {
 
 .text {
   /* font-size: 48px; */
-  font-size: 38px;
+  font-size: 36px;
   font-weight: 800;
-  /* opacity: 0; */
-  /* animation:
-    fadeIn 4s ease forwards 1s,
-    moveAndResize 1s ease forwards 5s; */
+  font-family: 'Bruno_Ace';
+
   background-image: linear-gradient(to right,
-      orange,
-      rgb(0, 153, 255),
-      rgb(174, 0, 255),
-      rgb(255, 0, 170),
-      rgb(174, 0, 255),
-      #ffcd4b,
-      orange);
+      var(--color-warm-yellow),
+      var(--color-coral-red),
+      var(--color-sky-blue),
+      var(--color-mint-green),
+      var(--color-soft-purple),
+      var(--color-light-pink));
   color: transparent;
   background-clip: text;
 }
@@ -239,7 +259,7 @@ input {
 input::placeholder {
   /* color: #2c3e5090; */
   font-size: 18px;
-  font-family: 'Jost';
+  font-family: 'Albert_Sans';
   padding-left: 23px;
   transform: translateY(-1px);
 }
@@ -284,7 +304,7 @@ input:-webkit-autofill {
 
 button {
   font-size: 18px;
-  font-family: 'Jost';
+  font-family: 'Albert_Sans';
   width: 120px;
   height: 40px;
   color: var(--color-text);

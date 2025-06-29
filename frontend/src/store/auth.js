@@ -11,10 +11,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const fetchCurrentUser = async () => {
     const res = await axios.get('/api/auth/me', { withCredentials: true })
-    console.log()
-    username.value = res.data.username
-    email.value = res.data.email
-    avatarUrl.value = res.data.avatar_url || DEFAULT_AVATAR_URL
+    const user = res.data
+
+    username.value = user.username
+    email.value = user.email
+    avatarUrl.value = user.avatar_url || DEFAULT_AVATAR_URL
   }
 
   const logout = async () => {

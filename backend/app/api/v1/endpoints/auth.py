@@ -119,7 +119,20 @@ async def auth_google(
             client_ip,
             log_publisher,
         )
-        return success_response("Authenticated via OAuth", data=token_data)
+
+        response = success_response(
+            "Authenticated via OAuth", data={"user": token_data["user"]}
+        )
+        response.set_cookie(
+            key="access_token",
+            value=token_data["access_token"],
+            httponly=True,
+            # secure=True,
+            samesite="Lax",
+            max_age=60 * 60 * 24 * 7,
+        )
+
+        return response
     except InvalidCredentialsError:
         return error_response("OAuth authentication failed", status_code=400)
 

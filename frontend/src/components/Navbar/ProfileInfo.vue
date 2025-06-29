@@ -28,6 +28,7 @@ const username = authStore.username
 const email = authStore.email
 const avatarUrl = authStore.avatarUrl
 
+
 const day = ref('')
 const month = ref('')
 const weekday = ref('')

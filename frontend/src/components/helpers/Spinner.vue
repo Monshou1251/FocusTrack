@@ -1,34 +1,71 @@
 <template>
-  <div class="loader"></div>
+  <div class="loading-overlay">
+    <div class="pulse-wrapper">
+      <div class="pulse-ring ring1"></div>
+      <div class="pulse-ring ring2"></div>
+      <div class="pulse-ring ring3"></div>
+    </div>
+  </div>
 </template>
 
-<script></script>
-
 <style scoped>
-.loader {
-  width: 70px;
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.3);
   display: flex;
-  justify-content: center;
   align-items: center;
-  aspect-ratio: 1.154;
-  --_g: no-repeat radial-gradient(farthest-side, rgba(189, 194, 199, 1) 90%, #0000);
-  --_g2: no-repeat radial-gradient(farthest-side, rgba(185, 46, 30, 1) 90%, #0000);
-  --_g3: no-repeat radial-gradient(farthest-side, rgba(43, 65, 65, 1) 90%, #0000);
-  background:
-    var(--_g) 50% 0,
-    var(--_g2) 0 100%,
-    var(--_g3) 100% 100%;
-  background-size: 35% calc(35% * 1.154);
-  animation: l16 1s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Using cubic-bezier for bouncy effect */
+  justify-content: center;
+  z-index: 9999;
 }
 
-@keyframes l16 {
-  50%,
+.pulse-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 6px solid;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 1.5s ease-out infinite;
+  opacity: 0;
+}
+
+.ring1 {
+  border-color: var(--color-coral-red);
+  animation-delay: 0s;
+}
+
+.ring2 {
+  border-color: var(--color-soft-purple);
+  animation-delay: 0.4s;
+}
+
+.ring3 {
+  border-color: var(--color-sky-blue);
+  animation-delay: 0.8s;
+}
+
+@keyframes pulse {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+
   100% {
-    background-position:
-      calc(100% - 5px) calc(100% - 5px),
-      /* Adjusted position */ 50% calc(0% + 5px),
-      calc(0% + 5px) calc(100% - 5px); /* Adjusted position */
+    width: 100px;
+    height: 100px;
+    opacity: 0;
   }
 }
 </style>
