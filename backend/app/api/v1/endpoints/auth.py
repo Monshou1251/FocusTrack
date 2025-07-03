@@ -11,14 +11,6 @@ from app.core.dependencies import (
     get_token_service,
     get_user_repository,
 )
-from app.core.interfaces import (
-    LogPublisher,
-    OAuthAccountRepository,
-    OAuthProvider,
-    PasswordHasher,
-    TokenService,
-    UserRepository,
-)
 from app.core.responses import error_response, success_response
 from app.core.security import get_current_user
 from app.db.models.user import User as DBUser
@@ -26,6 +18,12 @@ from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
 )
+from app.domain.interfaces.log_publisher import LogPublisher
+from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
+from app.domain.interfaces.oauth_provider import OAuthProvider
+from app.domain.interfaces.password_hasher import PasswordHasher
+from app.domain.interfaces.token_service import TokenService
+from app.domain.interfaces.user_repository import UserRepository
 from app.domain.services.auth_service import (
     authenticate_oauth_user,
     authenticate_user,

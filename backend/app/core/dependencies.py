@@ -1,23 +1,21 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.interfaces import (
-    LogPublisher,
-    OAuthAccountRepository,
-    OAuthProvider,
-    PasswordHasher,
-    TokenService,
-    UserRepository,
-)
 from app.core.security import BcryptHasher, JWTTokenService
 from app.db.session import get_db
-from app.infrastructure.auth_providers.google_provider import GoogleOAuthProvider
-from app.infrastructure.auth_providers.sqlalchemy_user_provider import (
-    SQLAlchemyOAuthAccountRepository,
-    SQLAlchemyUserRepository,
-)
+from app.domain.interfaces.log_publisher import LogPublisher
+from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
+from app.domain.interfaces.oauth_provider import OAuthProvider
+from app.domain.interfaces.password_hasher import PasswordHasher
+from app.domain.interfaces.token_service import TokenService
+from app.domain.interfaces.user_repository import UserRepository
 from app.infrastructure.messaging.rabbitmq.rabbitmq_publisher import (
     RabbitMQLogPublisher,
+)
+from app.infrastructure.oauth_providers.google_provider import GoogleOAuthProvider
+from app.infrastructure.repositories.sqlalchemy_user_provider import (
+    SQLAlchemyOAuthAccountRepository,
+    SQLAlchemyUserRepository,
 )
 
 

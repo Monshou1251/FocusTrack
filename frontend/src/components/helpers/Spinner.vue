@@ -36,8 +36,10 @@
   border: 6px solid;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  animation: pulse 1.5s ease-out infinite;
+  animation: pulse 2s ease-out infinite;
   opacity: 0;
+  filter: blur(1px) brightness(1.3);
+  box-shadow: 0 0 8px currentColor;
 }
 
 .ring1 {
@@ -60,6 +62,7 @@
     width: 0;
     height: 0;
     opacity: 1;
+
   }
 
   100% {

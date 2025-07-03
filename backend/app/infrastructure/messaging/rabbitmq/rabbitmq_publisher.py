@@ -7,8 +7,8 @@ import os
 from aio_pika import Message, connect_robust
 
 from app.core.config import settings
-from app.core.interfaces import LogPublisher
 from app.core.logging.events import LogEvent
+from app.domain.interfaces.log_publisher import LogPublisher
 
 log_dir = "fallback_logs"
 log_file = "fallback_logs.log"

@@ -8,9 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.core.config import settings
-from app.core.interfaces import PasswordHasher, TokenService
 from app.db.models.user import User
 from app.db.session import get_db
+from app.domain.interfaces.password_hasher import PasswordHasher
+from app.domain.interfaces.token_service import TokenService
 from app.domain.value_objects.user import UserPasswordHash
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")

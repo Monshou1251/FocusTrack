@@ -1,9 +1,9 @@
-from app.core.interfaces import LogPublisher
 from app.core.logging.events import (
     OAuthLoginAttemptLog,
     UserLoginAttemptLog,
     UserRegistrationAttemptLog,
 )
+from app.domain.interfaces.log_publisher import LogPublisher
 
 
 async def log_auth_attempt(

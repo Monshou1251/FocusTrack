@@ -2,18 +2,16 @@ import asyncio
 
 from fastapi.security import OAuth2PasswordBearer
 
-from app.core.interfaces import (
-    LogPublisher,
-    OAuthAccountRepository,
-    OAuthProvider,
-    PasswordHasher,
-    TokenService,
-    UserRepository,
-)
 from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
 )
+from app.domain.interfaces.log_publisher import LogPublisher
+from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
+from app.domain.interfaces.oauth_provider import OAuthProvider
+from app.domain.interfaces.password_hasher import PasswordHasher
+from app.domain.interfaces.token_service import TokenService
+from app.domain.interfaces.user_repository import UserRepository
 from app.domain.services.logging_service import (
     log_auth_attempt,
     log_oauth_attempt,

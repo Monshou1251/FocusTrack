@@ -1,10 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.interfaces import OAuthAccountRepository, UserRepository
 from app.db.models.user import OAuthAccount
 from app.db.models.user import User as ORMUser
 from app.domain.entities.user import User as EntityUser
+from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
+from app.domain.interfaces.user_repository import UserRepository
 from app.infrastructure.sqla_persistence.mappings.user_mapping import (
     user_orm_to_entity,
 )

@@ -1,9 +1,9 @@
-# app/infrastructure/oauth_providers/google_provider.py
+# app\infrastructure\repositories\google_provider.py
 
 import httpx
 
 from app.core.config import settings
-from app.core.interfaces import OAuthProvider
+from app.domain.interfaces.oauth_provider import OAuthProvider
 
 
 class GoogleOAuthProvider(OAuthProvider):

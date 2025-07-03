@@ -3,14 +3,14 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from backend.app.infrastructure.repositories.sqlalchemy_user_provider import (
+    SQLAlchemyUserRepository,
+)
 from fastapi import HTTPException, status
 
 from app.core.interfaces import PasswordHasher, TokenService
 from app.db.models.user import User
 from app.domain.services.auth_service import authenticate_user, register_user
-from app.infrastructure.auth_providers.sqlalchemy_user_provider import (
-    SQLAlchemyUserRepository,
-)
 from app.schemas.auth import UserAuthForm
 
 
