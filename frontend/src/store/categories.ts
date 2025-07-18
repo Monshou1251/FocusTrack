@@ -1,20 +1,21 @@
+// src/store/categories.ts
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useCategoryStore = defineStore('categories', () => {
-  const categories = ref(['First Focus', 'Second Focus'])
+  const categories = ref<string[]>(['First Focus', 'Second Focus'])
 
-  const selectedCategory = ref(categories.value[0] ?? null)
+  const selectedCategory = ref<string | null>(categories.value[0] ?? null)
 
   const pastelColors = [
-    '#ffcd4b', // тёплый жёлтый
-    '#FF6F61', // кораллово-красный
-    '#F58EA8', // мягкий розовый
-    '#6EC1E4', // голубой
-    '#42B883', // мятно-зелёный
-    '#A7D676', // светло-зелёный
-    '#A78BFA', // мягкий фиолетовый
-    '#80CBC4' // бирюзовый
+    '#ffcd4b',
+    '#FF6F61',
+    '#F58EA8',
+    '#6EC1E4',
+    '#42B883',
+    '#A7D676',
+    '#A78BFA',
+    '#80CBC4'
   ]
 
   const addCategory = () => {
@@ -25,15 +26,15 @@ export const useCategoryStore = defineStore('categories', () => {
     }
   }
 
-  const deleteCategory = (index) => {
+  const deleteCategory = (index: number) => {
     categories.value.splice(index, 1)
   }
 
-  const updateCategory = (index, newName) => {
+  const updateCategory = (index: number, newName: string) => {
     categories.value[index] = newName.trim()
   }
 
-  const getColorByIndex = (index) => pastelColors[index % pastelColors.length]
+  const getColorByIndex = (index: number): string => pastelColors[index % pastelColors.length]
 
   return {
     categories,

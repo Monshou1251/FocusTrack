@@ -3,8 +3,8 @@
         <div class="panels">
             <div class="panels-left">
                 <CategoriesButton :iconLeft="mdiLogout" :text="selectedCategory" />
-                <PaceButton :text="paceOptions" :iconRight="mdiMenuDown" :withFilling="false" title="Pace" />
-                <RestButton :text="restOptions" :iconRight="mdiMenuDown" :withFilling="false" title="Rest" />
+                <PaceButton :iconRight="mdiMenuDown" :withFilling="false" title="Pace" />
+                <RestButton :iconRight="mdiMenuDown" :withFilling="false" title="Rest" />
             </div>
             <div class="panels-right">
                 <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md" />
@@ -29,131 +29,41 @@
         </div>
 
         <div class="buttons">
-            <div class="tooltip" data-tooltip="Play / Pause">
-                <svg-icon class="button-icons" type="mdi" :path="isRunning ? mdiPause : mdiPlay" @click="toggleTimer" />
-            </div>
-            <div class="tooltip" data-tooltip="Stop and reset">
-                <svg-icon class="button-icons" type="mdi" :path="mdiStop" @click="stopTimer" />
-            </div>
-            <div class="tooltip" data-tooltip="Reset">
-                <svg-icon class="button-icons" type="mdi" :path="mdiAutorenew" @click="resetTimer" />
-            </div>
+            <TimerControls />
         </div>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import TimerControls from '@/components/MainPage/TimerControls.vue'
 import { useCategoryStore } from '@/store/categories'
 import { useTimerStore } from '@/store/timer'
-import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiArrowExpand, mdiAutorenew, mdiLogout, mdiMenuDown, mdiPause, mdiPlay, mdiStop } from '@mdi/js'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { mdiArrowExpand, mdiLogout, mdiMenuDown } from '@mdi/js'
+import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 import ButtonOne from '../Buttons/ButtonOne.vue'
 import CategoriesButton from '../Buttons/CategoriesButton.vue'
 import PaceButton from '../Buttons/PaceButton.vue'
 import RestButton from '../Buttons/RestButton.vue'
 
-const isRunning = ref(false)
-const startTimestamp = ref(0)
-const elapsed = ref(0)
-
 const categoryStore = useCategoryStore()
 const selectedCategory = categoryStore.categories
 
 const timerStore = useTimerStore()
-const paceOptions = timerStore.paceOptions
-const restOptions = timerStore.restOptions
-const currentPace = computed(() => timerStore.currentPace)
-const paceLimitMs = computed(() => currentPace.value * 60 * 1000)
 
-const currentRest = computed(() => timerStore.currentRest)
-const restLimitMs = computed(() => currentRest.value * 60 * 1000)
+const {
+    minutesStr,
+    secondsStr,
+} = storeToRefs(timerStore)
 
 
 const mode = ref('focus')
-const limitMs = computed(() =>
-    mode.value === 'focus'
-        ? timerStore.currentPace * 60 * 1000
-        : timerStore.currentRest * 60 * 1000
-)
 
-const remainingTime = ref(paceLimitMs.value)
-
-const update = () => {
-    const passed = Date.now() - startTimestamp.value
-    remainingTime.value = Math.max(limitMs.value - passed, 0)
-
-    if (remainingTime.value <= 0) {
-        pauseTimer()
-
-        if (mode.value === "focus") {
-            mode.value = "rest"
-            remainingTime.value = restLimitMs.value
-        } else {
-            mode.value = "focus"
-            remainingTime.value = paceLimitMs.value
-        }
-    }
-}
-
-let intervalId = null
-
-const startTimer = () => {
-    if (!isRunning.value) {
-        isRunning.value = true
-        startTimestamp.value = Date.now()
-        intervalId = setInterval(update, 100)
-    }
-}
-const pauseTimer = () => {
-    isRunning.value = false
-    clearInterval(intervalId)
-}
-
-const toggleTimer = () => {
-    isRunning.value ? pauseTimer() : startTimer()
-}
-
-const resetTimer = () => {
-    pauseTimer()
-    remainingTime.value = paceLimitMs.value
-}
-
-const stopTimer = () => {
-    pauseTimer()
-    resetTimer()
-}
-
-const minutesStr = computed(() => {
-    const mins = Math.floor(remainingTime.value / 60000)
-    return mins.toString().padStart(2, '0')
-})
-
-const secondsStr = computed(() => {
-    const secs = Math.floor((remainingTime.value % 60000) / 1000)
-    return secs.toString().padStart(2, '0')
-})
 
 const toggleFullscreen = () => {
     console.log("toggleFullscreen")
     // TODO: переход в полноэкранный режим здесь
 }
-
-watch(currentPace, (newVal) => {
-    pauseTimer()
-    remainingTime.value = newVal * 60 * 1000
-})
-
-onMounted(() => {
-    const saved = localStorage.getItem('timerMilliseconds')
-    if (saved !== null && !isNaN(parseFloat(saved))) {
-        elapsed.value = parseFloat(saved)
-    }
-})
-
-onBeforeUnmount(() => {
-    pauseTimer()
-})
 </script>
 
 
@@ -253,31 +163,5 @@ onBeforeUnmount(() => {
 .expand-button {
     width: 35px;
     height: 35px;
-}
-
-.buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    background-color: var(--color-background-soft);
-    min-width: 200px;
-    height: 60px;
-    border-radius: var(--border-radius-8);
-    transform: translateY(-10px);
-
-}
-
-.button-icons {
-    height: 32px;
-    width: auto;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.button-icons:hover {
-    background-color: var(--color-background-soft);
-    transform: scale(1.05);
-    cursor: pointer;
 }
 </style>

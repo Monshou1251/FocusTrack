@@ -1,7 +1,5 @@
 import asyncio
 
-from fastapi.security import OAuth2PasswordBearer
-
 from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
@@ -18,8 +16,6 @@ from app.domain.services.logging_service import (
     log_registration_attempt,
 )
 from app.schemas.auth import EmailLoginForm, EmailRegisterForm
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 async def register_user(

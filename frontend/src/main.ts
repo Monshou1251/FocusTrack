@@ -1,3 +1,4 @@
+import 'vue-heatmap-table/dist/vue-heatmap-table.css'
 import './assets/main.css'
 
 import '@fortawesome/fontawesome-free/css/all.css'

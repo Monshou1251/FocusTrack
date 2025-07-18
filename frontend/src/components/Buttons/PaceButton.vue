@@ -8,7 +8,7 @@
             </button>
 
             <ul v-if="dropdownOpen" class="dropdown">
-                <li v-for="(item, index) in props.text" :key="index" class="dropdown-item" @click="selectItem(item)">
+                <li v-for="(item, index) in paceOptions" :key="index" class="dropdown-item" @click="selectItem(item)">
                     {{ item }}
                 </li>
             </ul>
@@ -22,10 +22,9 @@
 <script setup>
 import { useTimerStore } from '@/store/timer'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
-    text: { type: Array, required: true },
     iconRight: { type: String, default: null },
     withFilling: { type: Boolean, default: true },
     noShadow: { type: Boolean, default: false },
@@ -36,10 +35,11 @@ const timerStore = useTimerStore()
 
 const dropdownOpen = ref(false)
 const selectedText = ref(
-    props.text.length > 0 ? props.text[0] : null
+    timerStore.currentPace
 )
 const dropdownRef = ref(null)
 
+const paceOptions = computed(() => timerStore.paceOptions)
 
 watch(() => props.text, (newVal) => {
     selectedText.value = newVal
@@ -66,7 +66,10 @@ const handleClickOutside = (e) => {
     }
 }
 
-onMounted(() => document.addEventListener('click', handleClickOutside))
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+
+})
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 </script>
 

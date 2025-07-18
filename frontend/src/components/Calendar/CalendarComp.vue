@@ -11,15 +11,7 @@
         </div>
 
         <div class="calendar-container" v-if="mode === 'year'">
-            <calendar-heatmap dark-mode :values="activityData" :end-date="new Date().toISOString().slice(0, 10)"
-                :round="2" :range-color="[
-                    'var(--color-background-mute-2)',
-                    'hsla(150, 30%, 85%, 0.8)',
-                    'hsla(150, 30%, 70%, 0.8)',
-                    'hsla(150, 30%, 55%, 0.8)',
-                    'hsla(150, 30%, 40%, 0.8)',
-                    'hsla(150, 30%, 25%, 0.8)'
-                ]" />
+            <HeatmapTable :data="sampleData" :emptyColor="'var(--color-background-mute)'" />
         </div>
 
         <div v-else>
@@ -28,53 +20,19 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { CalendarHeatmap } from 'vue3-calendar-heatmap';
+import HeatmapTable from "vue-heatmap-table";
 import WeeklyChart from './WeeklyChart.vue';
 
 const mode = ref('year')
 
-const activityData = [
-    { date: '2024-07-01', count: 2 },
-    { date: '2024-07-02', count: 1 },
-    { date: '2024-07-15', count: 4 },
-    { date: '2024-08-04', count: 2 },
-    { date: '2024-08-05', count: 3 },
-    { date: '2024-08-06', count: 2 },
-    { date: '2024-08-20', count: 6 },
-    { date: '2024-09-10', count: 3 },
-    { date: '2024-09-11', count: 4 },
-    { date: '2024-09-25', count: 7 },
-    { date: '2024-10-03', count: 2 },
-    { date: '2024-10-04', count: 3 },
-    { date: '2024-10-05', count: 1 },
-    { date: '2024-10-18', count: 5 },
-    { date: '2024-11-01', count: 7 },
-    { date: '2024-11-02', count: 8 },
-    { date: '2024-11-15', count: 4 },
-    { date: '2024-12-05', count: 2 },
-    { date: '2024-12-06', count: 3 },
-    { date: '2024-12-20', count: 5 },
-    { date: '2025-01-10', count: 3 },
-    { date: '2025-01-11', count: 4 },
-    { date: '2025-01-25', count: 6 },
-    { date: '2025-02-05', count: 4 },
-    { date: '2025-02-06', count: 5 },
-    { date: '2025-02-20', count: 2 },
-    { date: '2025-03-01', count: 6 },
-    { date: '2025-03-02', count: 7 },
-    { date: '2025-03-10', count: 8 },
-    { date: '2025-03-11', count: 6 },
-    { date: '2025-04-01', count: 5 },
-    { date: '2025-04-02', count: 3 },
-    { date: '2025-05-10', count: 7 },
-    { date: '2025-05-11', count: 5 },
-    { date: '2025-06-10', count: 2 },
-    { date: '2025-06-11', count: 3 },
-    { date: '2025-06-13', count: 4 },
-];
-
+const sampleData = {
+    "2025-01-01": 1,
+    "2025-02-03": 3,
+    "2025-04-15": 6,
+    "2025-12-31": 2,
+};
 
 
 </script>
@@ -126,7 +84,9 @@ const activityData = [
 }
 
 .calendar-container {
-    /* display: flex; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: row;
     padding: 0px 20px;
     padding-top: 15px;
@@ -138,6 +98,7 @@ const activityData = [
     /* border: 1px solid var(--color-border); */
     border-radius: 6px;
     /* background-color: var(--color-background); */
+    padding-bottom: 20px;
 }
 
 :deep(.vch__legend) {
