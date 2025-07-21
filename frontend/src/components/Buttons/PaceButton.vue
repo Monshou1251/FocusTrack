@@ -19,10 +19,10 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 import { useTimerStore } from '@/store/timer'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
     iconRight: { type: String, default: null },
@@ -37,13 +37,13 @@ const dropdownOpen = ref(false)
 const selectedText = ref(
     timerStore.currentPace
 )
-const dropdownRef = ref(null)
+const dropdownRef = ref<HTMLElement | null>(null)
 
 const paceOptions = computed(() => timerStore.paceOptions)
 
-watch(() => props.text, (newVal) => {
-    selectedText.value = newVal
-})
+// watch(() => props.text, (newVal) => {
+//     selectedText.value = newVal
+// })
 
 const toggleDropdown = () => {
     dropdownOpen.value = !dropdownOpen.value
@@ -53,15 +53,15 @@ const closeDropdown = () => {
     dropdownOpen.value = false
 }
 
-const selectItem = (item) => {
+const selectItem = (item: number) => {
     selectedText.value = item
     timerStore.currentPace = item
-    console.log("timerStore.currentPace: ", timerStore.currentPace)
+    timerStore.resetTimer()
     closeDropdown()
 }
 
-const handleClickOutside = (e) => {
-    if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+const handleClickOutside = (e: MouseEvent) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
         closeDropdown()
     }
 }

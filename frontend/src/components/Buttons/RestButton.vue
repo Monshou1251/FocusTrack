@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { useTimerStore } from '@/store/timer'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
     iconRight: { type: String, default: null },
@@ -39,12 +39,12 @@ const selectedText = ref(
 )
 const restList = computed(() => timerStore.restOptions)
 
-const dropdownRef = ref(null)
+const dropdownRef = ref<HTMLElement | null>(null)
 
 
-watch(() => props.text, (newVal) => {
-    selectedText.value = newVal
-})
+// watch(() => props.text, (newVal) => {
+//     selectedText.value = newVal
+// })
 
 const toggleDropdown = () => {
     dropdownOpen.value = !dropdownOpen.value
@@ -54,15 +54,16 @@ const closeDropdown = () => {
     dropdownOpen.value = false
 }
 
-const selectItem = (item) => {
+const selectItem = (item: number) => {
     selectedText.value = item
     timerStore.currentRest = item
+    timerStore.resetRestTimer()
     console.log("timerStore.currentRest: ", timerStore.currentRest)
     closeDropdown()
 }
 
-const handleClickOutside = (e) => {
-    if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+const handleClickOutside = (e: MouseEvent) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
         closeDropdown()
     }
 }
@@ -74,7 +75,6 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 <style scoped>
 .button-main {
     position: relative;
-    /* чтобы .dropdown позиционировался относительно этой обёртки */
     display: flex;
     flex-direction: row;
     justify-content: center;

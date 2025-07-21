@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const STORAGE_KEYS = {
   pace: 'currentPace',
   rest: 'currentRest',
-  phase: 'timerPhase'
+  phase: 'timerPhase',
+  timer: 'currentTimer'
 }
 
 export const useTimerStore = defineStore('timer', () => {
   const paceOptions = ref<number[]>([0.1, 15, 30, 45, 60, 75, 90])
-  const restOptions = ref<number[]>([0.2, 5, 10, 15, 20, 25, 30])
+  const restOptions = ref<number[]>([0.05, 5, 10, 15, 20, 25, 30])
 
   const currentPace = ref<number>(
     Number(localStorage.getItem(STORAGE_KEYS.pace)) || paceOptions.value[0]
@@ -26,6 +27,7 @@ export const useTimerStore = defineStore('timer', () => {
   const isRunning = ref(false)
   const remainingTime = ref(currentPace.value * 60 * 1000)
   const startTimestamp = ref(0)
+  let manuallyPaused = false
 
   let intervalId: ReturnType<typeof setInterval> | null = null
 
@@ -33,72 +35,73 @@ export const useTimerStore = defineStore('timer', () => {
     phase.value === 'focus' ? currentPace.value * 60 * 1000 : currentRest.value * 60 * 1000
   )
 
-  const paceLimitMs = computed(() => currentPace.value * 60 * 1000)
-  const restLimitMs = computed(() => currentRest.value * 60 * 1000)
-
   const update = () => {
-    const passed = Date.now() - startTimestamp.value
-    remainingTime.value = Math.max(actualLimitMs.value - passed, 0)
+    const elapsed = Date.now() - startTimestamp.value
+    remainingTime.value = Math.max(limitMs.value - elapsed, 0)
 
     if (remainingTime.value <= 0) {
       pauseTimer()
 
-      if (phase.value === 'focus') {
-        phase.value = 'rest'
-        actualLimitMs.value = restLimitMs.value
-        remainingTime.value = actualLimitMs.value
-      } else {
-        phase.value = 'focus'
-        actualLimitMs.value = paceLimitMs.value
-        remainingTime.value = actualLimitMs.value
-      }
+      phase.value = phase.value === 'focus' ? 'rest' : 'focus'
+      remainingTime.value = limitMs.value
     }
   }
 
-  const actualLimitMs = ref(limitMs.value) // будет использоваться в таймере
-
-  watch([phase, currentPace, currentRest], () => {
-    if (!isRunning.value) {
-      actualLimitMs.value = limitMs.value
-    }
-  })
+  const actualLimitMs = ref(limitMs.value)
 
   const startTimer = () => {
-    if (!isRunning.value) {
-      isRunning.value = true
-      startTimestamp.value = Date.now()
+    if (isRunning.value) return
 
-      if (pausedRemaining !== null) {
-        actualLimitMs.value = pausedRemaining
-        pausedRemaining = null
-      }
+    isRunning.value = true
+    startTimestamp.value = Date.now() - (limitMs.value - remainingTime.value)
 
-      intervalId = setInterval(update, 100)
-    }
+    intervalId = setInterval(update, 100)
   }
 
   let pausedRemaining: number | null = null
 
   const pauseTimer = () => {
-    if (isRunning.value) {
-      isRunning.value = false
-      if (intervalId !== null) {
-        clearInterval(intervalId)
-        intervalId = null
-      }
-      // сохраняем сколько осталось
-      pausedRemaining = remainingTime.value
+    if (!isRunning.value) return
+
+    isRunning.value = false
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = null
     }
   }
 
   const toggleTimer = () => {
-    console.log('Toggling timer')
-    isRunning.value ? pauseTimer() : startTimer()
+    if (isRunning.value) {
+      manuallyPaused = true
+      pauseTimer()
+      manuallyPaused = false
+    } else {
+      startTimer()
+    }
   }
 
   const resetTimer = () => {
+    console.log('Timer reseted')
+
     pauseTimer()
-    remainingTime.value = paceLimitMs.value
+
+    phase.value = 'focus'
+    pausedRemaining = null
+
+    actualLimitMs.value = limitMs.value
+    remainingTime.value = actualLimitMs.value
+  }
+
+  const resetRestTimer = () => {
+    console.log('Rest Timer reseted')
+
+    pauseTimer()
+
+    // phase.value = 'focus'
+    pausedRemaining = null
+
+    actualLimitMs.value = limitMs.value
+    remainingTime.value = actualLimitMs.value
   }
 
   const stopTimer = () => {
@@ -132,21 +135,36 @@ export const useTimerStore = defineStore('timer', () => {
   })
 
   onMounted(() => {
-    // Восстановить текущий pace (в минутах)
     const savedPace = localStorage.getItem(STORAGE_KEYS.pace)
+    console.log('savedPace: ', savedPace)
     if (savedPace !== null && !isNaN(parseFloat(savedPace))) {
       currentPace.value = parseFloat(savedPace)
     }
 
-    // Восстановить оставшееся время таймера
-    const savedTime = localStorage.getItem(STORAGE_KEYS.phase)
-    console.log('savedTime: ', savedTime)
-    if (savedTime !== null && !isNaN(parseFloat(savedTime))) {
-      remainingTime.value = parseFloat(savedTime)
-    } else {
-      remainingTime.value = currentPace.value * 60 * 1000
+    const savedRest = localStorage.getItem(STORAGE_KEYS.rest)
+    console.log('savedRest: ', savedRest)
+    if (savedRest !== null && !isNaN(parseFloat(savedRest))) {
+      currentRest.value = parseFloat(savedRest)
     }
+
+    const savedTime = localStorage.getItem(STORAGE_KEYS.timer)
+    if (savedTime) {
+      remainingTime.value = parseInt(savedTime)
+    }
+    window.addEventListener('beforeunload', saveTimerToStorage)
   })
+
+  onMounted(() => {})
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', saveTimerToStorage)
+  })
+
+  function saveTimerToStorage() {
+    pauseTimer()
+    localStorage.setItem(STORAGE_KEYS.timer, String(remainingTime.value))
+    localStorage.setItem(STORAGE_KEYS.phase, phase.value)
+  }
 
   return {
     // state
@@ -159,12 +177,14 @@ export const useTimerStore = defineStore('timer', () => {
     remainingTime,
     minutesStr,
     secondsStr,
+    actualLimitMs,
 
     // actions
     toggleTimer,
     resetTimer,
     stopTimer,
     pauseTimer,
-    startTimer
+    startTimer,
+    resetRestTimer
   }
 })

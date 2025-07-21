@@ -12,7 +12,7 @@
         </div>
 
         <div class="timer">
-            <div class="time-center" :class="mode == 'focus' ? null : 'rest-timer'">
+            <div class="time-center" :class="phase == 'focus' ? null : 'rest-timer'">
                 <div class="digits">
                     <span class="digit">{{ minutesStr[0] }}</span>
                     <span class="digit">{{ minutesStr[1] }}</span>
@@ -23,7 +23,7 @@
                     <span class="digit">{{ secondsStr[1] }}</span>
                 </div>
             </div>
-            <div v-show="mode == 'rest'" class="rest-signal">
+            <div v-show="phase == 'rest'" class="rest-signal">
                 Rest time
             </div>
         </div>
@@ -40,7 +40,6 @@ import { useCategoryStore } from '@/store/categories'
 import { useTimerStore } from '@/store/timer'
 import { mdiArrowExpand, mdiLogout, mdiMenuDown } from '@mdi/js'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
 import ButtonOne from '../Buttons/ButtonOne.vue'
 import CategoriesButton from '../Buttons/CategoriesButton.vue'
 import PaceButton from '../Buttons/PaceButton.vue'
@@ -54,10 +53,8 @@ const timerStore = useTimerStore()
 const {
     minutesStr,
     secondsStr,
+    phase
 } = storeToRefs(timerStore)
-
-
-const mode = ref('focus')
 
 
 const toggleFullscreen = () => {
