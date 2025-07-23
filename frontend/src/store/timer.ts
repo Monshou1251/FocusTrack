@@ -1,3 +1,4 @@
+import { saveSprint } from '@/composables/useSprint'
 import { defineStore } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
@@ -29,18 +30,31 @@ export const useTimerStore = defineStore('timer', () => {
   const startTimestamp = ref(0)
   let manuallyPaused = false
 
+  const savedToDB = ref(false)
+  const minPercentToSave = 0.3
+
+  const hasEnoughFocus = computed(() => {
+    return (
+      phase.value === 'focus' &&
+      currentPace.value * 60 * 1000 - remainingTime.value >=
+        currentPace.value * 60 * 1000 * minPercentToSave
+    )
+  })
+
   let intervalId: ReturnType<typeof setInterval> | null = null
 
   const limitMs = computed(() =>
     phase.value === 'focus' ? currentPace.value * 60 * 1000 : currentRest.value * 60 * 1000
   )
 
-  const update = () => {
+  const update = async () => {
     const elapsed = Date.now() - startTimestamp.value
     remainingTime.value = Math.max(limitMs.value - elapsed, 0)
 
     if (remainingTime.value <= 0) {
       pauseTimer()
+
+      await saveSprint()
 
       phase.value = phase.value === 'focus' ? 'rest' : 'focus'
       remainingTime.value = limitMs.value
@@ -51,7 +65,9 @@ export const useTimerStore = defineStore('timer', () => {
 
   const startTimer = () => {
     if (isRunning.value) return
-
+    if (phase.value == 'focus') {
+      savedToDB.value = false
+    }
     isRunning.value = true
     startTimestamp.value = Date.now() - (limitMs.value - remainingTime.value)
 
@@ -104,9 +120,15 @@ export const useTimerStore = defineStore('timer', () => {
     remainingTime.value = actualLimitMs.value
   }
 
-  const stopTimer = () => {
+  const stopTimer = async () => {
+    console.log('savedToDB.value: ', savedToDB.value)
+    console.log('hasEnoughFocus.value: ', hasEnoughFocus.value)
+
+    await saveSprint()
+
     pauseTimer()
     resetTimer()
+    savedToDB.value = false
   }
 
   const minutesStr = computed(() => {
@@ -154,17 +176,19 @@ export const useTimerStore = defineStore('timer', () => {
     window.addEventListener('beforeunload', saveTimerToStorage)
   })
 
-  onMounted(() => {})
-
-  onBeforeUnmount(() => {
-    window.removeEventListener('beforeunload', saveTimerToStorage)
-  })
-
   function saveTimerToStorage() {
     pauseTimer()
     localStorage.setItem(STORAGE_KEYS.timer, String(remainingTime.value))
     localStorage.setItem(STORAGE_KEYS.phase, phase.value)
   }
+
+  const getActualFocusDuration = () => {
+    return phase.value === 'focus' ? limitMs.value - remainingTime.value : 0
+  }
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', saveTimerToStorage)
+  })
 
   return {
     // state
@@ -178,6 +202,7 @@ export const useTimerStore = defineStore('timer', () => {
     minutesStr,
     secondsStr,
     actualLimitMs,
+    savedToDB,
 
     // actions
     toggleTimer,
@@ -185,6 +210,8 @@ export const useTimerStore = defineStore('timer', () => {
     stopTimer,
     pauseTimer,
     startTimer,
-    resetRestTimer
+    resetRestTimer,
+    getActualFocusDuration,
+    hasEnoughFocus
   }
 })

@@ -53,6 +53,9 @@ const authStore = useAuthStore()
 
 const router = useRouter();
 
+const BASE_URL = import.meta.env.VITE_API_URL
+
+
 const email = ref("")
 const password = ref("")
 
@@ -65,7 +68,7 @@ const signIn = async () => {
     form.append('email', email.value)
     form.append('password', password.value)
 
-    const response = await axios.post('/api/auth/login', form)
+    const response = await axios.post(`${BASE_URL}/auth/login`, form)
     const data = response.data
 
     if (data.success) {
@@ -101,7 +104,7 @@ const signUp = async () => {
     form.append('email', email.value)
     form.append('password', password.value)
 
-    const response = await axios.post('/api/auth/register', form)
+    const response = await axios.post(`${BASE_URL}/auth/register`, form)
     const data = response.data
 
     if (data.success) {
@@ -134,7 +137,7 @@ const handleGoogleLogin = googleProvider.useGoogleLogin({
     console.log('Logged in with Google', res);
     try {
       isLoading.value = true
-      const response = await axios.post('/api/auth/google_auth', res);
+      const response = await axios.post(`${BASE_URL}/auth/google_auth`, res);
       const data = response.data
 
       if (data.success) {
