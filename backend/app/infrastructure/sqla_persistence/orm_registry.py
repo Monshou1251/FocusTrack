@@ -1,4 +1,3 @@
-# app/db/base.py
 from types import MappingProxyType
 
 from sqlalchemy import MetaData

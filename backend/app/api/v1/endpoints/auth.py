@@ -12,8 +12,8 @@ from app.core.dependencies import (
     get_user_repository,
 )
 from app.core.responses import error_response, success_response
-from app.core.security import get_current_user
-from app.db.models.user import User as DBUser
+from app.core.security.user_security import get_current_user
+from app.domain.entities.user import User as UserEntity
 from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
@@ -136,12 +136,12 @@ async def auth_google(
 
 
 @router.get("/me", response_model=UserOut)
-async def get_me(current_user: DBUser = Depends(get_current_user)) -> UserOut:
+async def get_me(current_user: UserEntity = Depends(get_current_user)) -> UserOut:
     return UserOut(
-        id=int(current_user.id),
-        email=current_user.email,
-        username=current_user.username if current_user.username else None,
-        avatar_url=str(current_user.avatar_url) if current_user.avatar_url else None,
+        id=current_user.id.value,
+        email=current_user.email.value,
+        username=current_user.username.value if current_user.username else None,
+        avatar_url=current_user.avatar_url.value if current_user.avatar_url else None,
     )
 
 

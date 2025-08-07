@@ -1,7 +1,7 @@
 <template>
     <div class="profile-info">
         <div class="avatar">
-            <img :src="avatarUrl" alt="User avatar" />
+            <img :src="avatarUrl" alt="User avatar" referrerPolicy="no-referrer" />
         </div>
         <div class="userinfo">
             <div class="username">{{ username }}</div>

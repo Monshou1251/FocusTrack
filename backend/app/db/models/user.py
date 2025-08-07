@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import UserRole
 from app.db.base import Base
-from app.db.models.category import Category
-from app.db.models.sprint import Sprint
+
+if TYPE_CHECKING:
+    from app.db.models.category import Category
+    from app.db.models.sprint import Sprint
 
 
 class User(Base):

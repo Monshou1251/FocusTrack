@@ -1,5 +1,15 @@
 # README_DEV
 
+## 08 august 2025 — Отправка данных о спринтаз на бек
+
+- Haven't add anything in here for a while, even though made a lot of changes.
+- Added functionlaity to save sprints into DB.
+- According to DDD made DTO and other stuff to save sprints to bd, and ofc distinguished everything into diff layers to follow clean architecture.
+
+- Now I need to add feature to add and delete categories.
+
+---
+
 ## 23 июля 2025 — Отправка данных о спринтаз на бек
 
 - Сделал сервис по отправке запросов

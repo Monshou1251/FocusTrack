@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 
-from app.core.security import BcryptHasher, JWTTokenService
+from app.core.security.hash_data import BcryptHasher, JWTTokenService
 
 
 @pytest.fixture

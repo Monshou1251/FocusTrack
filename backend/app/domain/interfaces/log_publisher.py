@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from app.core.logging.events import LogEvent
+from app.core.logging.user_events import LogEvent
 
 
 class LogPublisher(Protocol):
