@@ -1,21 +1,24 @@
 <template>
-  <div class="layout">
-    <div>
+  <div class="layout" :class="{ 'fullscreen': isFullscreen }">
+    <!-- Navbar - hidden in fullscreen mode -->
+    <div v-show="!isFullscreen">
       <Navbar class="navbar" />
     </div>
-    <div class="content">
-      <div class="cell performance">Performance</div>
-      <div class="cell main-content">
+
+    <div class="content" :class="{ 'fullscreen': isFullscreen }">
+      <!-- All other components hidden in fullscreen mode -->
+      <div v-show="!isFullscreen" class="cell performance">Performance</div>
+      <div class="cell main-content" :class="{ 'fullscreen': isFullscreen }">
         <MainContent></MainContent>
       </div>
-      <div class="cell spotify">spotify</div>
-      <div class="cell categories">
+      <div v-show="!isFullscreen" class="cell spotify">spotify</div>
+      <div v-show="!isFullscreen" class="cell categories">
         <CategoriesComp />
       </div>
-      <div class="cell calendar">
+      <div v-show="!isFullscreen" class="cell calendar">
         <CalendarComp />
       </div>
-      <div class="cell smth">smth</div>
+      <div v-show="!isFullscreen" class="cell smth">smth</div>
     </div>
   </div>
 </template>
@@ -26,6 +29,11 @@ import CalendarComp from '@/components/Calendar/CalendarComp.vue';
 import CategoriesComp from '@/components/Categories/CategoriesComp.vue';
 import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
+import { useTimerStore } from '@/store/timer';
+import { storeToRefs } from 'pinia';
+
+const timerStore = useTimerStore();
+const { isFullscreen } = storeToRefs(timerStore);
 </script>
 
 <style scoped>
@@ -36,6 +44,13 @@ import Navbar from '@/components/Navbar/Navbar.vue';
     "content";
   grid-template-rows: auto 1fr;
   height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.layout.fullscreen {
+  grid-template-areas: "content";
+  grid-template-rows: 1fr;
+  overflow: hidden;
 }
 
 .navbar {
@@ -56,6 +71,17 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   padding-top: 0;
   margin-top: 10px;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.content.fullscreen {
+  grid-template-areas: "main";
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  gap: 0;
+  padding: 0;
+  margin-top: 0;
+  overflow: hidden;
 }
 
 .performance {
@@ -70,7 +96,6 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   grid-area: smth;
 }
 
-
 .main-content {
   grid-area: main;
   background-color: var(--color-background-mute);
@@ -79,9 +104,19 @@ import Navbar from '@/components/Navbar/Navbar.vue';
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  transition: opacity 0.3s ease, background-color 0.3s ease, border 0.3s ease;
 }
 
-
+.main-content.fullscreen {
+  background: var(--color-background-mute);
+  border: none;
+  border-radius: 0;
+  justify-content: center;
+  overflow: visible;
+  padding: 20px;
+  height: auto;
+  min-height: 100vh;
+}
 
 .categories {
   grid-area: categories;
@@ -97,6 +132,5 @@ import Navbar from '@/components/Navbar/Navbar.vue';
 .calendar {
   grid-area: calendar;
   /* padding: 0; */
-
 }
 </style>

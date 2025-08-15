@@ -8,9 +8,10 @@
             </button>
 
             <ul v-if="dropdownOpen" class="dropdown">
-                <li v-for="(item, index) in props.text" :key="index" class="dropdown-item" @click="selectItem(item)">
-                    <span class="color-dot" :style="{ backgroundColor: getColor(index) }" />
-                    {{ item }}
+                <li v-for="category in categories" :key="category.id" class="dropdown-item"
+                    @click="selectItem(category)">
+                    <span class="color-dot" :style="{ backgroundColor: getColor(categories.indexOf(category)) }" />
+                    {{ category.name }}
                 </li>
             </ul>
         </div>
@@ -27,27 +28,29 @@ import { mdiMenuDown } from '@mdi/js'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
-    text: { type: Array, required: true },
+    text: { type: String, required: true },
+    categories: { type: Array, required: true },
+    selectedCategory: { type: Object, default: null },
     noShadow: { type: Boolean, default: false },
     title: { type: String, default: '' },
 })
 
-
 const dropdownOpen = ref(false)
-const selectedText = ref(
-    props.text.length > 0 ? props.text[0] : null
-)
+const selectedText = ref(props.text)
 const dropdownRef = ref(null)
 
 const categoryStore = useCategoryStore()
 const getColor = categoryStore.getColorByIndex
 
-const currentIndex = computed(() =>
-    selectedText.value ? categoryStore.categories.indexOf(selectedText.value) : -1
-)
-const currentColor = computed(() =>
-    currentIndex.value >= 0 ? getColor(currentIndex.value) : '#ccc'
-)
+const currentIndex = computed(() => {
+    if (!props.selectedCategory || !props.categories) return -1
+    return props.categories.findIndex(c => c.id === props.selectedCategory.id)
+})
+
+const currentColor = computed(() => {
+    const index = currentIndex.value
+    return index >= 0 ? getColor(index) : '#ccc'
+})
 
 watch(() => props.text, (newVal) => {
     selectedText.value = newVal
@@ -61,9 +64,8 @@ const closeDropdown = () => {
     dropdownOpen.value = false
 }
 
-const selectItem = (item) => {
-    selectedText.value = item
-    categoryStore.selectedCategory = item
+const selectItem = (category) => {
+    categoryStore.selectedCategory = category
     closeDropdown()
 }
 

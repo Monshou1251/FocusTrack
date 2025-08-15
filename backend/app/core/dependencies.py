@@ -1,8 +1,11 @@
+from functools import lru_cache
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security.hash_data import BcryptHasher, JWTTokenService
 from app.db.session import get_db
+from app.domain.interfaces.category_repository import ICategoryRepository
 from app.domain.interfaces.log_publisher import LogPublisher
 from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
 from app.domain.interfaces.oauth_provider import OAuthProvider
@@ -14,8 +17,11 @@ from app.infrastructure.messaging.rabbitmq.rabbitmq_publisher import (
     RabbitMQLogPublisher,
 )
 from app.infrastructure.oauth_providers.google_provider import GoogleOAuthProvider
-from app.infrastructure.repositories.sqla_sprint_saver import (
-    SQLAlchemySprintSaverRepository,
+from app.infrastructure.repositories.sqla_category_provider import (
+    SQLAlchemyCategoryRepository,
+)
+from app.infrastructure.repositories.sqla_sprint_provider import (
+    SQLAlchemySprintRepository,
 )
 from app.infrastructure.repositories.sqlalchemy_user_provider import (
     SQLAlchemyOAuthAccountRepository,
@@ -45,6 +51,7 @@ def get_oauth_account_repository(
     return SQLAlchemyOAuthAccountRepository(session)
 
 
+@lru_cache(maxsize=1)
 def get_log_publisher() -> LogPublisher:
     return RabbitMQLogPublisher()
 
@@ -52,4 +59,10 @@ def get_log_publisher() -> LogPublisher:
 def get_sprint_repository(
     session: AsyncSession = Depends(get_db),
 ) -> ISprintRepository:
-    return SQLAlchemySprintSaverRepository(session)
+    return SQLAlchemySprintRepository(session)
+
+
+def get_category_repository(
+    session: AsyncSession = Depends(get_db),
+) -> ICategoryRepository:
+    return SQLAlchemyCategoryRepository(session)

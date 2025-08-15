@@ -12,7 +12,7 @@ from app.infrastructure.sqla_persistence.mappings.sprint_mapping import (
 )
 
 
-class SQLAlchemySprintSaverRepository(ISprintRepository):
+class SQLAlchemySprintRepository(ISprintRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 

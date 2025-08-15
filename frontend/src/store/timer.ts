@@ -33,6 +33,9 @@ export const useTimerStore = defineStore('timer', () => {
   const savedToDB = ref(false)
   const minPercentToSave = 0.3
 
+  // Fullscreen state
+  const isFullscreen = ref(false)
+
   const hasEnoughFocus = computed(() => {
     return (
       phase.value === 'focus' &&
@@ -52,11 +55,18 @@ export const useTimerStore = defineStore('timer', () => {
     remainingTime.value = Math.max(limitMs.value - elapsed, 0)
 
     if (remainingTime.value <= 0) {
+      const finishedFocus = phase.value === 'focus'
       pauseTimer()
 
-      await saveSprint()
+      if (finishedFocus) {
+        try {
+          await saveSprint()
+        } catch (e) {
+          console.error('Failed to save sprint:', e)
+        }
+      }
 
-      phase.value = phase.value === 'focus' ? 'rest' : 'focus'
+      phase.value = finishedFocus ? 'rest' : 'focus'
       remainingTime.value = limitMs.value
     }
   }
@@ -186,6 +196,19 @@ export const useTimerStore = defineStore('timer', () => {
     return phase.value === 'focus' ? limitMs.value - remainingTime.value : 0
   }
 
+  const toggleFullscreen = () => {
+    isFullscreen.value = !isFullscreen.value
+
+    // Add/remove fullscreen class to body and html
+    if (isFullscreen.value) {
+      document.body.classList.add('fullscreen')
+      document.documentElement.classList.add('fullscreen')
+    } else {
+      document.body.classList.remove('fullscreen')
+      document.documentElement.classList.remove('fullscreen')
+    }
+  }
+
   onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', saveTimerToStorage)
   })
@@ -203,6 +226,7 @@ export const useTimerStore = defineStore('timer', () => {
     secondsStr,
     actualLimitMs,
     savedToDB,
+    isFullscreen,
 
     // actions
     toggleTimer,
@@ -212,6 +236,7 @@ export const useTimerStore = defineStore('timer', () => {
     startTimer,
     resetRestTimer,
     getActualFocusDuration,
-    hasEnoughFocus
+    hasEnoughFocus,
+    toggleFullscreen
   }
 })

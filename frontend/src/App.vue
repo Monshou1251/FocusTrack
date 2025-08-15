@@ -6,4 +6,18 @@
 import { RouterView } from 'vue-router';
 </script>
 
-<style></style>
+<style>
+/* Hide scrollbars in fullscreen mode */
+body.fullscreen {
+  overflow: hidden !important;
+}
+
+html.fullscreen {
+  overflow: hidden !important;
+}
+
+/* Ensure no scrollbars appear */
+.fullscreen * {
+  overflow: hidden !important;
+}
+</style>

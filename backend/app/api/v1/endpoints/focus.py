@@ -34,10 +34,6 @@ async def save_sprint(
         duration=data.duration,
         started_at=data.started_at,
     )
-    print("current_user:", current_user)
-    print("client_ip: ", client_ip)
-    print("data")
-    print(data)
 
     await save_sprint_service(dto, sprint_repo, client_ip, log_publisher)
 

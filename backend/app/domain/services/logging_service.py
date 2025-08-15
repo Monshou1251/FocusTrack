@@ -1,4 +1,5 @@
 from app.core.logging.user_events import (
+    CategoryEventLog,
     OAuthLoginAttemptLog,
     SprintEventLog,
     UserLoginAttemptLog,
@@ -57,4 +58,13 @@ async def log_save_sprint_attempt(
         ip=ip,
         error=error,
     )
+    await log_publisher.publish(event)
+
+
+async def log_category_operation_attempt(
+    log_publisher: LogPublisher,
+    event_cls: type[CategoryEventLog] = CategoryEventLog,
+    **kwargs,
+):
+    event = event_cls(**kwargs)
     await log_publisher.publish(event)

@@ -4,7 +4,7 @@ import { sprintApi, SprintPayload } from '@/api/sprintApi'
 import { useCategoryStore } from '@/store/categories'
 import { useTimerStore } from '@/store/timer'
 
-export async function saveSprint() {
+export async function saveSprint(opts?: { force?: boolean; payload?: SprintPayload }) {
   const timeStore = useTimerStore()
   const categoryStore = useCategoryStore()
 
@@ -12,11 +12,13 @@ export async function saveSprint() {
     throw new Error('Category is not selected')
   }
 
-  if (timeStore.savedToDB) return
-  if (!timeStore.hasEnoughFocus) return
+  if (!opts?.force) {
+    if (timeStore.savedToDB) return
+    if (!timeStore.hasEnoughFocus) return
+  }
 
-  const payload: SprintPayload = {
-    category: categoryStore.selectedCategory,
+  const payload: SprintPayload = opts?.payload ?? {
+    category: categoryStore.selectedCategory.name,
     duration: timeStore.getActualFocusDuration(),
     started_at: new Date().toISOString()
   }
