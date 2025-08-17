@@ -11,6 +11,7 @@ from app.domain.interfaces.log_publisher import LogPublisher
 from app.domain.interfaces.sprint_repository import (
     ISprintRepository,
 )
+from app.domain.services.get_sprints_service import get_sprints_service
 from app.domain.services.save_sprint_service import save_sprint_service
 from app.schemas.sprint import PSprintSaveModel
 
@@ -38,3 +39,21 @@ async def save_sprint(
     await save_sprint_service(dto, sprint_repo, client_ip, log_publisher)
 
     return JSONResponse(content={"message": "Sprint received"}, status_code=200)
+
+
+@router.get("/sprints")
+async def get_sprints(
+    request: Request,
+    current_user=Depends(get_current_user),
+    sprint_repo: ISprintRepository = Depends(get_sprint_repository),
+    log_publisher: LogPublisher = Depends(get_log_publisher),
+):
+    client_ip = request.client.host if request.client else "unknown"
+
+    return await get_sprints_service(
+        sprint_repo=sprint_repo,
+        user_id=current_user.id.value,
+        email=current_user.email.value,
+        client_ip=client_ip,
+        log_publisher=log_publisher,
+    )

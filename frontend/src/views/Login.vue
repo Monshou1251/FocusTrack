@@ -11,11 +11,15 @@
           <div>
             <div class="form-group">
               <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
-              <input type="email" name="email" v-model="email" class="form-control" placeholder="email" />
+              <input type="email" name="email" v-model="email" @input="clearErrors" class="form-control"
+                :class="{ 'error': emailError }" placeholder="email" />
+              <div v-if="emailError" class="error-message">{{ emailError }}</div>
             </div>
             <div class="form-group">
               <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
-              <input type="password" name="password" v-model="password" class="form-control" placeholder="password" />
+              <input type="password" name="password" v-model="password" @input="clearErrors" class="form-control"
+                :class="{ 'error': passwordError }" placeholder="password" />
+              <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
             </div>
           </div>
           <div class="button-group">
@@ -41,6 +45,8 @@ import Navbar from '@/components/Navbar/Navbar.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 // import SpinnerLoad from '@/components/Helpers/SpinnerLoad.vue'
 import Spinner from '@/components/helpers/Spinner.vue'
+
+import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/store/auth'
 import { mdiAt, mdiGithub, mdiGoogle, mdiKeyVariant } from '@mdi/js'
 import axios from 'axios'
@@ -50,6 +56,7 @@ import { useRouter } from 'vue-router'
 
 
 const authStore = useAuthStore()
+const { showSuccess, showError } = useToast()
 
 const router = useRouter();
 
@@ -60,8 +67,28 @@ const email = ref("")
 const password = ref("")
 
 const isLoading = ref(false)
+const emailError = ref("")
+const passwordError = ref("")
+
+const clearErrors = () => {
+  emailError.value = ""
+  passwordError.value = ""
+}
 
 const signIn = async () => {
+  // Clear previous errors
+  clearErrors()
+
+  // Validate fields
+  if (!email.value.trim()) {
+    emailError.value = "Email is required"
+    return
+  }
+  if (!password.value.trim()) {
+    passwordError.value = "Password is required"
+    return
+  }
+
   isLoading.value = true
   try {
     const form = new FormData()
@@ -77,16 +104,16 @@ const signIn = async () => {
         router.push('/main')
       } catch (e) {
         console.error("❌ fetchCurrentUser failed:", e)
-        alert("❌ Ошибка при получении данных пользователя")
+        showError("Ошибка при получении данных пользователя")
       }
     } else {
-      alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
+      showError(data.error ?? data.message ?? "Login failed")
     }
 
   } catch (error) {
     const errData = error.response?.data
-    const errMsg = errData?.message ?? "Login failed11"
-    alert("❌ " + errMsg)
+    const errMsg = errData?.message ?? "Login failed"
+    showError(errMsg)
   } finally {
     isLoading.value = false
   }
@@ -96,7 +123,7 @@ const signIn = async () => {
 const signUp = async () => {
   isLoading.value = true
   if (!email.value.trim() || !password.value.trim()) {
-    alert("❌ Please enter both email and password.")
+    showError("Please enter both email and password.")
     return
   }
   try {
@@ -108,16 +135,16 @@ const signUp = async () => {
     const data = response.data
 
     if (data.success) {
-      alert("✅ Successfully registered!")
+      showSuccess("Successfully registered!")
     } else {
-      alert("❌ Error: " + (data.error ?? "Registration failed"))
+      showError(data.error ?? "Registration failed")
     }
 
   } catch (error) {
     console.log(error)
     const errData = error?.response?.data
-    const errMsg = errData?.message ?? "Registration failed2"
-    alert("❌ " + errMsg)
+    const errMsg = errData?.message ?? "Registration failed"
+    showError(errMsg)
     console.error("Registration error:", error)
   } finally {
     isLoading.value = false
@@ -144,19 +171,19 @@ const handleGoogleLogin = googleProvider.useGoogleLogin({
         await authStore.fetchCurrentUser()
         router.push('/main')
       } else {
-        alert("❌ Error: " + (data.error ?? data.message ?? "Login failed"))
+        showError(data.error ?? data.message ?? "Login failed")
       }
       console.log('✅ Auth success:', response.data);
     } catch (e) {
       console.error('❌ Auth error:', e);
-      alert('❌ Ошибка при входе через Google.');
+      showError('Google auth failed.');
     } finally {
       isLoading.value = false
     }
   },
   onError: (err) => {
     console.error('❌ Failed to login with Google:', err);
-    alert('❌ Ошибка: не удалось авторизоваться через Google.');
+    showError('Error: Google auth failed.');
   },
 });
 
@@ -273,6 +300,19 @@ input:-webkit-autofill {
 
 .form-control:focus {
   outline: 1px solid #2b414149;
+}
+
+.form-control.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+  font-weight: 500;
 }
 
 .form-group:focus-within svg {

@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { useSprintStore } from './sprints'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
 
@@ -18,6 +19,10 @@ export const useAuthStore = defineStore('auth', () => {
     username.value = user.username
     email.value = user.email
     avatarUrl.value = user.avatar_url || DEFAULT_AVATAR_URL
+
+    // Fetch sprints after successful authentication
+    const sprintStore = useSprintStore()
+    await sprintStore.fetchSprints()
   }
 
   const logout = async () => {

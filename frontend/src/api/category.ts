@@ -15,11 +15,7 @@ export const CategoryApi = {
   getAll() {
     return http.get<CategoriesResponse>(`${CATEGORY_ROOT}/categories`)
   },
-  getAllNames() {
-    return http
-      .get<CategoriesResponse>(`${CATEGORY_ROOT}/categories`)
-      .then((res) => res.data.categories.map((c) => c.name))
-  },
+
   create(payload: { name: string }) {
     return http.post<Category>(CATEGORY_ROOT, payload)
   },

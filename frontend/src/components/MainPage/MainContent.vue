@@ -147,9 +147,10 @@ const { toggleFullscreen } = timerStore
     align-items: center;
     position: relative;
     font-family: 'Bruno_Ace', sans-serif;
-    gap: 16px;
+    gap: 32px;
     flex-shrink: 0;
     transition: opacity 0.3s ease;
+    padding-bottom: 18px;
 }
 
 /* Mode indicator styles */

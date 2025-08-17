@@ -7,18 +7,20 @@
 
     <div class="content" :class="{ 'fullscreen': isFullscreen }">
       <!-- All other components hidden in fullscreen mode -->
-      <div v-show="!isFullscreen" class="cell performance">Performance</div>
+      <div v-show="!isFullscreen" class="cell performance">
+        <WeeklyPerformance />
+      </div>
       <div class="cell main-content" :class="{ 'fullscreen': isFullscreen }">
         <MainContent></MainContent>
       </div>
-      <div v-show="!isFullscreen" class="cell spotify">spotify</div>
+      <div v-show="!isFullscreen" class="cell spotify">smth</div>
       <div v-show="!isFullscreen" class="cell categories">
         <CategoriesComp />
       </div>
       <div v-show="!isFullscreen" class="cell calendar">
         <CalendarComp />
       </div>
-      <div v-show="!isFullscreen" class="cell smth">smth</div>
+      <div v-show="!isFullscreen" class="cell smth">spotify</div>
     </div>
   </div>
 </template>
@@ -29,6 +31,7 @@ import CalendarComp from '@/components/Calendar/CalendarComp.vue';
 import CategoriesComp from '@/components/Categories/CategoriesComp.vue';
 import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
+import WeeklyPerformance from '@/components/Performance/WeeklyPerformance.vue';
 import { useTimerStore } from '@/store/timer';
 import { storeToRefs } from 'pinia';
 
@@ -86,6 +89,8 @@ const { isFullscreen } = storeToRefs(timerStore);
 
 .performance {
   grid-area: performance;
+  border: 1.4px dashed var(--color-border);
+  padding: 0;
 }
 
 .spotify {

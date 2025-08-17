@@ -34,7 +34,7 @@ const { isFullscreen } = storeToRefs(timerStore)
     min-width: 200px;
     height: 60px;
     border-radius: var(--border-radius-8);
-    margin-bottom: 20px;
+    margin-bottom: 28px;
     transition: opacity 0.3s ease, background-color 0.3s ease;
 }
 

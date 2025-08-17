@@ -1,6 +1,63 @@
 # README_DEV
 
-## 08 august 2025 — Отправка данных о спринтаз на бек
+## 18 august 2025 — Toast notifications, category management and landing page
+
+- Implemented comprehensive toast notification system:
+  - Replaced all `alert()` calls with beautiful toast notifications
+  - Added types: success, error, info, warning with corresponding colors and icons
+  - Entrance/exit animations, auto-hide after 5 seconds
+- Created full CRUD for categories:
+  - Modal windows for adding, editing and deleting
+  - Loading spinners for all operations
+  - Error handling with beautiful messages
+  - Modal closing with Esc key and buttons
+- Implemented fullscreen timer mode:
+  - Hiding all panels when activated
+  - Timer takes full screen
+  - Semi-transparent controls with hover effects
+- Created landing page (`/`):
+  - Minimalist design with large title
+  - Text appearance animations letter by letter
+  - Large arrow for transition to login page
+  - Smooth page transition with fade-out animation
+- Added sprint functionality:
+  - Backend endpoint for getting all user sprints
+  - Activity calendar integration
+  - WeeklyPerformance component for weekly statistics
+  - Display focus time instead of sprint count
+- Improved UI/UX:
+  - Fixed authentication issues (http-only cookies)
+  - Added inline form validation
+  - Optimized performance (disabled SQLAlchemy echo, optimized RabbitMQ)
+
+### Next steps
+
+- Possible additional UI/UX improvements
+- Testing all new features
+
+---
+
+## 17 august 2025 — Fullscreen timer mode and UI improvements
+
+- Implemented fullscreen mode for timer:
+  - All panels hidden when activated (navbar, categories, calendar, performance)
+  - Timer takes full screen with centering
+  - Timer controls become semi-transparent, fully visible on hover
+  - Exit fullscreen button with smooth transitions
+- Improved visual separation of Focus/Rest modes:
+  - Replaced yellow digits with separate mode indicator
+  - Added icons (star for focus, checkmark for rest)
+  - Gradient backgrounds for each mode
+- Fixed UI element clipping issues in fullscreen mode
+- Added smooth transitions between normal and fullscreen modes
+
+### Next steps
+
+- Need to add category management functionality (CRUD operations)
+
+---
+
+## 08 august 2025 — Sprint data submission to backend
 
 - Haven't add anything in here for a while, even though made a lot of changes.
 - Added functionlaity to save sprints into DB.

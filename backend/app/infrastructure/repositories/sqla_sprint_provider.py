@@ -46,3 +46,19 @@ class SQLAlchemySprintRepository(ISprintRepository):
             )
 
         return category_id
+
+    async def get_sprints_from_db(self, user_id: int) -> list[dict[str, str]]:
+        stmt = select(ORMSprint.id, ORMSprint.duration, ORMSprint.started_at).where(
+            ORMSprint.user_id == user_id
+        )
+        result = await self.session.execute(stmt)
+        sprints = [
+            {
+                "id": str(row.id),
+                "duration": str(row.duration),
+                "started_at": row.started_at.isoformat(),
+            }
+            for row in result.all()
+        ]
+
+        return sprints
