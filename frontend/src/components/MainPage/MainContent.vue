@@ -20,7 +20,8 @@
 
         <div class="timer">
             <!-- Mode indicator -->
-            <div class="mode-indicator" :class="phase">
+            <div class="mode-indicator" :class="phase"
+                :style="phase === 'focus' ? { '--focus-shadow': `0 4px 12px ${hexToRgba(selectedCategoryColor, 0.35)}` } : {}">
                 <span class="mode-text">{{ phase === 'focus' ? 'Focus' : 'Rest' }}</span>
                 <div class="mode-icon" :class="phase">
                     <svg v-if="phase === 'focus'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -59,6 +60,7 @@ import { useCategoryStore } from '@/store/categories'
 import { useTimerStore } from '@/store/timer'
 import { mdiArrowCollapse, mdiArrowExpand, mdiLogout, mdiMenuDown } from '@mdi/js'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import ButtonOne from '../Buttons/ButtonOne.vue'
 import CategoriesButton from '../Buttons/CategoriesButton.vue'
 import PaceButton from '../Buttons/PaceButton.vue'
@@ -77,6 +79,24 @@ const {
 } = storeToRefs(timerStore)
 
 const { toggleFullscreen } = timerStore
+
+const selectedCategoryColor = computed(() => {
+    if (!selectedCategory.value) return '#007bff'
+    const idx = categories.value.findIndex(c => c.id === selectedCategory.value?.id)
+    const safeIndex = idx >= 0 ? idx : 0
+    return categoryStore.getColorByIndex(safeIndex)
+})
+
+function hexToRgba(hex: string, alpha: number): string {
+    const sanitized = hex.replace('#', '')
+    const bigint = parseInt(sanitized.length === 3
+        ? sanitized.split('').map(c => c + c).join('')
+        : sanitized, 16)
+    const r = (bigint >> 16) & 255
+    const g = (bigint >> 8) & 255
+    const b = bigint & 255
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 </script>
 
 
@@ -171,7 +191,7 @@ const { toggleFullscreen } = timerStore
 .mode-indicator.focus {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    box-shadow: var(--focus-shadow, 0 4px 12px rgba(0, 123, 255, 0.3));
 }
 
 .mode-indicator.rest {
@@ -232,6 +252,20 @@ const { toggleFullscreen } = timerStore
     font-size: 64px;
     font-weight: 400;
     transition: all 0.3s ease;
+}
+
+/* Bigger timer in fullscreen */
+.main.fullscreen .time-center {
+    gap: 0.75rem;
+}
+
+.main.fullscreen .digit {
+    font-size: 96px;
+    width: 84px;
+}
+
+.main.fullscreen .separator {
+    font-size: 96px;
 }
 
 .seconds {

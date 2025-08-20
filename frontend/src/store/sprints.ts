@@ -6,6 +6,7 @@ export const useSprintStore = defineStore('sprints', () => {
   const sprints = ref<Sprint[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isLoaded = ref(false)
 
   const fetchSprints = async () => {
     try {
@@ -13,6 +14,7 @@ export const useSprintStore = defineStore('sprints', () => {
       error.value = null
       const response = await getSprintsApi()
       sprints.value = response.data.sprints
+      isLoaded.value = true
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch sprints'
       console.error('Error fetching sprints:', err)
@@ -44,6 +46,7 @@ export const useSprintStore = defineStore('sprints', () => {
   return {
     sprints,
     isLoading,
+    isLoaded,
     error,
     fetchSprints,
     addSprint,

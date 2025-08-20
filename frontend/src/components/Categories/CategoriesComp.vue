@@ -234,7 +234,6 @@ const handleKeydown = (e) => {
 onMounted(async () => {
     document.addEventListener('keydown', handleKeydown)
     await categoryStore.fetchCategories()
-    console.log(categoryStore.categories)
 })
 
 onBeforeUnmount(() => {
@@ -267,15 +266,19 @@ onBeforeUnmount(() => {
     justify-content: space-between;
     padding: 0px 10px;
     border-radius: 6px;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, filter 0.2s ease, opacity 0.2s ease;
     height: 35px;
     gap: 5px;
     /* font-size: 14px; */
+    opacity: 0.92;
+    filter: saturate(0.9) brightness(0.98);
 }
 
 .category-item:hover {
     background-color: var(--color-background-soft);
     cursor: pointer;
+    opacity: 1;
+    filter: none;
 }
 
 .category-name {
@@ -296,6 +299,12 @@ onBeforeUnmount(() => {
     width: 20px;
     height: 20px;
     border-radius: 6px;
+    opacity: 0.92;
+    transition: opacity 0.2s ease;
+}
+
+.category-item:hover .color-box {
+    opacity: 1;
 }
 
 .actions {

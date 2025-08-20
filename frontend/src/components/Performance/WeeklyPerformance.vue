@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { useSprintStore } from '@/store/sprints';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import TopPanel from '../TopPanel/TopPanelComp.vue';
 
 const sprintStore = useSprintStore();
@@ -100,14 +100,14 @@ const getBarColor = (count: number) => {
         const r = Math.round(34 + (234 - 34) * greenToYellow);
         const g = Math.round(197 + (179 - 197) * greenToYellow);
         const b = Math.round(94 + (8 - 94) * greenToYellow);
-        return `rgba(${r}, ${g}, ${b}, 0.7)`;
+        return `rgba(${r}, ${g}, ${b}, 0.8)`;
     } else {
 
         const yellowToRed = (ratio - 0.5) * 2; // 0 -> 1
         const r = Math.round(234 + (220 - 234) * yellowToRed);
         const g = Math.round(179 + (38 - 179) * yellowToRed);
         const b = Math.round(8 + (38 - 8) * yellowToRed);
-        return `rgba(${r}, ${g}, ${b}, 0.7)`;
+        return `rgba(${r}, ${g}, ${b}, 0.8)`;
     }
 };
 
@@ -131,11 +131,6 @@ const formatMinutes = (minutes: number) => {
     return `${hours.toFixed(1)}h`;
 };
 
-onMounted(async () => {
-    if (sprintStore.sprints.length === 0) {
-        await sprintStore.fetchSprints();
-    }
-});
 </script>
 
 <style scoped>
@@ -152,8 +147,8 @@ onMounted(async () => {
     align-items: center;
     flex: 1;
     padding: 10px;
-    min-height: 150px;
-    padding-bottom: 20px;
+    min-height: 220px;
+    padding-bottom: 8px;
 }
 
 .loading {
@@ -161,6 +156,8 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     color: var(--color-text-mute);
+    height: 100%;
+    width: 100%;
 }
 
 .loading-spinner {
@@ -205,6 +202,7 @@ onMounted(async () => {
     justify-content: flex-end;
     width: 100%;
     height: 100%;
+    flex: 1;
     gap: 8px;
 }
 
@@ -213,7 +211,10 @@ onMounted(async () => {
     align-items: end;
     justify-content: space-between;
     width: 100%;
-    height: 80px;
+    height: auto;
+    flex: 1;
+    min-height: 160px;
+    padding-top: 24px;
     gap: 4px;
 }
 

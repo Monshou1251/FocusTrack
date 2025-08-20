@@ -1,5 +1,41 @@
 # README_DEV
 
+## 21 august 2025 — AI Chat integration and fullscreen timer improvements
+
+- Added Interactive AI Chat component:
+  - Chat interface with user and AI messages
+  - Quick suggestion buttons for common productivity questions
+  - Smart responses about focus techniques, time management, work sessions
+  - Auto-scroll to new messages, loading indicators
+  - Responsive design with proper overflow handling
+- Improved fullscreen timer mode:
+  - Increased timer font size in fullscreen (96px vs 64px)
+  - Better visual hierarchy and spacing
+  - Smooth transitions between modes
+- Fixed grid layout issues:
+  - Prevented chat component from stretching grid cells
+  - Added proper overflow handling for all grid cells
+  - Maintained consistent grid structure regardless of content
+- Enhanced UI responsiveness:
+  - Chat component adapts to available space without breaking layout
+  - Proper scrollbars appear when content overflows
+  - Grid maintains fixed proportions in all modes
+
+### Next steps
+
+- Integrate real AI API (Hugging Face planned)
+- Test AI chat with various productivity questions
+- Consider adding more AI features (personalized advice, progress analysis)
+
+---
+
+## 20 august 2025 — Daily activity
+
+- Added module for daily activity with TreeMap diagram.
+- Got rid of multiple requests to bd.
+
+---
+
 ## 18 august 2025 — Toast notifications, category management and landing page
 
 - Implemented comprehensive toast notification system:

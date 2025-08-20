@@ -85,7 +85,7 @@ onMounted(() => {
 }
 
 .date {
-    width: 140px;
+    width: 160px;
     height: 48px;
     display: flex;
     /* flex-direction: row; */

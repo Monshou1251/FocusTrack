@@ -8,6 +8,7 @@ import { ref } from 'vue'
 export const useCategoryStore = defineStore('categories', () => {
   const categories = ref<Category[]>([])
   const isLoading = ref(false)
+  const isLoaded = ref(false)
   const selectedCategory = ref<Category | null>(null)
 
   const pastelColors = [
@@ -90,6 +91,7 @@ export const useCategoryStore = defineStore('categories', () => {
       const res = await CategoryApi.getAll()
       categories.value = res.data.categories
       selectedCategory.value = categories.value[0] ?? null
+      isLoaded.value = true
     } catch (e) {
       console.log(e)
       isLoading.value = false
@@ -109,6 +111,7 @@ export const useCategoryStore = defineStore('categories', () => {
     getColorByIndex,
     fetchCategories,
     selectedCategory,
-    isLoading
+    isLoading,
+    isLoaded
   }
 })

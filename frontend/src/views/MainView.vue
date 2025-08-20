@@ -13,30 +13,50 @@
       <div class="cell main-content" :class="{ 'fullscreen': isFullscreen }">
         <MainContent></MainContent>
       </div>
-      <div v-show="!isFullscreen" class="cell spotify">smth</div>
+      <div v-show="!isFullscreen" class="cell daily">
+        <DailyPerformance />
+      </div>
       <div v-show="!isFullscreen" class="cell categories">
         <CategoriesComp />
       </div>
       <div v-show="!isFullscreen" class="cell calendar">
         <CalendarComp />
       </div>
-      <div v-show="!isFullscreen" class="cell smth">spotify</div>
+      <div v-show="!isFullscreen" class="cell ai-chat">
+        <AIChatComp />
+      </div>
     </div>
   </div>
 </template>
 
 
 <script setup>
+import AIChatComp from '@/components/AI/AIChatComp.vue';
 import CalendarComp from '@/components/Calendar/CalendarComp.vue';
 import CategoriesComp from '@/components/Categories/CategoriesComp.vue';
 import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
+import DailyPerformance from '@/components/Performance/DailyPerformance.vue';
 import WeeklyPerformance from '@/components/Performance/WeeklyPerformance.vue';
+import { useCategoryStore } from '@/store/categories';
+import { useSprintStore } from '@/store/sprints';
 import { useTimerStore } from '@/store/timer';
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 
 const timerStore = useTimerStore();
 const { isFullscreen } = storeToRefs(timerStore);
+
+// One-time bootstrap of shared data
+const sprintStore = useSprintStore();
+const categoryStore = useCategoryStore();
+
+onMounted(async () => {
+  await Promise.all([
+    sprintStore.fetchSprints(),
+    categoryStore.fetchCategories()
+  ]);
+});
 </script>
 
 <style scoped>
@@ -64,9 +84,9 @@ const { isFullscreen } = storeToRefs(timerStore);
   grid-area: content;
   display: grid;
   grid-template-areas:
-    "performance main spotify"
-    "categories main smth"
-    "categories calendar smth";
+    "performance main daily"
+    "categories main ai-chat"
+    "categories calendar ai-chat";
   grid-template-columns: 1fr 3fr 1fr;
   grid-template-rows: 3fr 2fr auto;
   gap: 10px;
@@ -75,6 +95,9 @@ const { isFullscreen } = storeToRefs(timerStore);
   margin-top: 10px;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  min-height: 0;
+  /* NEW */
+  min-width: 0;
 }
 
 .content.fullscreen {
@@ -93,12 +116,20 @@ const { isFullscreen } = storeToRefs(timerStore);
   padding: 0;
 }
 
-.spotify {
-  grid-area: spotify;
+
+
+.daily {
+  grid-area: daily;
+  min-width: 0;
+  overflow: hidden;
+  border: 1.4px dashed var(--color-border);
 }
 
-.smth {
-  grid-area: smth;
+.cell.ai-chat {
+  grid-area: ai-chat;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+
 }
 
 .main-content {
@@ -132,7 +163,10 @@ const { isFullscreen } = storeToRefs(timerStore);
 .cell {
   padding: 10px;
   border-radius: 8px;
+  overflow: hidden;
+  height: 100%;
 }
+
 
 .calendar {
   grid-area: calendar;

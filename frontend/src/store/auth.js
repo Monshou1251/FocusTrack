@@ -1,4 +1,5 @@
 // src/store/auth.js
+import { flushPendingSprints } from '@/composables/useSprint'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
@@ -23,6 +24,10 @@ export const useAuthStore = defineStore('auth', () => {
     // Fetch sprints after successful authentication
     const sprintStore = useSprintStore()
     await sprintStore.fetchSprints()
+    // Try to flush any pending sprints saved during expired session
+    try {
+      await flushPendingSprints()
+    } catch (_) {}
   }
 
   const logout = async () => {
