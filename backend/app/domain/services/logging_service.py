@@ -1,5 +1,6 @@
 from app.core.logging.user_events import (
     CategoryEventLog,
+    JournalEventLog,
     OAuthLoginAttemptLog,
     SprintEventLog,
     UserLoginAttemptLog,
@@ -68,3 +69,27 @@ async def log_category_operation_attempt(
 ):
     event = event_cls(**kwargs)
     await log_publisher.publish(event)
+
+
+async def log_journal_operation_attempt(
+    log_publisher: LogPublisher,
+    event: str,
+    user_id: int,
+    email: str,
+    success: bool,
+    entry_id: int | None = None,
+    ip: str = "",
+    error: str | None = None,
+    **extra,
+):
+    event_log = JournalEventLog(
+        event=event,
+        user_id=user_id,
+        email=email,
+        success=success,
+        entry_id=entry_id,
+        ip=ip,
+        error=error,
+        **extra,
+    )
+    await log_publisher.publish(event_log)

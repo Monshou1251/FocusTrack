@@ -54,6 +54,7 @@ const goToLogin = async () => {
   isTransitioning.value = true
 
   // Ждем завершения анимации исчезновения
+  // await new Promise(resolve => setTimeout(resolve, 500))
   await new Promise(resolve => setTimeout(resolve, 500))
 
   // Переходим на страницу логина
@@ -64,7 +65,7 @@ const goToLogin = async () => {
 <style scoped>
 .landing-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-background-mute) 100%);
+  background: linear-gradient(135deg, var(--color-background) -50%, var(--color-background-mute) 100%);
   display: flex;
   align-items: center;
   justify-content: center;

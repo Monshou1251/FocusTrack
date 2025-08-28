@@ -9,9 +9,9 @@
             <div v-else-if="sprintStore.error" class="error">
                 <span>{{ sprintStore.error }}</span>
             </div>
-            <div v-else-if="Object.keys(calendarData).length === 0" class="empty-state">
+            <!-- <div v-else-if="Object.keys(calendarData).length === 0" class="empty-state">
                 <span>No activity yet</span>
-            </div>
+            </div> -->
             <HeatmapTable v-else :data="calendarData" :emptyColor="'var(--color-background-mute)'" />
         </div>
     </div>

@@ -23,7 +23,7 @@
         <CalendarComp />
       </div>
       <div v-show="!isFullscreen" class="cell ai-chat">
-        <AIChatComp />
+        <JournalComp />
       </div>
     </div>
   </div>
@@ -31,9 +31,9 @@
 
 
 <script setup>
-import AIChatComp from '@/components/AI/AIChatComp.vue';
 import CalendarComp from '@/components/Calendar/CalendarComp.vue';
 import CategoriesComp from '@/components/Categories/CategoriesComp.vue';
+import JournalComp from '@/components/Journal/JournalComp.vue';
 import MainContent from '@/components/MainPage/MainContent.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
 import DailyPerformance from '@/components/Performance/DailyPerformance.vue';
@@ -88,7 +88,7 @@ onMounted(async () => {
     "categories main ai-chat"
     "categories calendar ai-chat";
   grid-template-columns: 1fr 3fr 1fr;
-  grid-template-rows: 3fr 2fr auto;
+  grid-template-rows: 5fr 4fr auto;
   gap: 10px;
   padding: 1rem;
   padding-top: 0;

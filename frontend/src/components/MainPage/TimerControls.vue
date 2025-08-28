@@ -1,13 +1,13 @@
 <template>
     <div class="buttons" :class="{ 'fullscreen': isFullscreen }">
-        <div class="tooltip" data-tooltip="Play / Pause">
+        <div ref="playButtonRef" class="button-wrapper">
             <svg-icon class="button-icons" type="mdi" :path="timerStore.isRunning ? mdiPause : mdiPlay"
                 @click="timerStore.toggleTimer()" />
         </div>
-        <div class="tooltip" data-tooltip="Stop and reset">
+        <div ref="stopButtonRef" class="button-wrapper">
             <svg-icon class="button-icons" type="mdi" :path="mdiStop" @click="timerStore.stopTimer()" />
         </div>
-        <div class="tooltip" data-tooltip="Reset">
+        <div ref="resetButtonRef" class="button-wrapper">
             <svg-icon class="button-icons" type="mdi" :path="mdiAutorenew" @click="timerStore.resetTimer()" />
         </div>
     </div>
@@ -18,11 +18,66 @@ import { useTimerStore } from '@/store/timer';
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiAutorenew, mdiPause, mdiPlay, mdiStop } from '@mdi/js';
 import { storeToRefs } from 'pinia';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const timerStore = useTimerStore()
 const { isFullscreen } = storeToRefs(timerStore)
-</script>
 
+const playButtonRef = ref(null);
+const stopButtonRef = ref(null);
+const resetButtonRef = ref(null);
+
+let tippyInstances: any[] = [];
+
+onMounted(() => {
+    // Initialize tooltips
+    if (playButtonRef.value) {
+        tippyInstances.push(tippy(playButtonRef.value, {
+            content: 'Play / Pause',
+            placement: 'top',
+            arrow: true,
+            theme: 'custom',
+            animation: 'scale',
+            duration: [0, 0],
+            zIndex: 9999
+        }));
+    }
+
+    if (stopButtonRef.value) {
+        tippyInstances.push(tippy(stopButtonRef.value, {
+            content: 'Stop and reset',
+            placement: 'top',
+            arrow: true,
+            theme: 'custom',
+            animation: 'scale',
+            duration: [0, 0],
+            zIndex: 9999
+        }));
+    }
+
+    if (resetButtonRef.value) {
+        tippyInstances.push(tippy(resetButtonRef.value, {
+            content: 'Reset',
+            placement: 'top',
+            arrow: true,
+            theme: 'custom',
+            animation: 'scale',
+            duration: [0, 0],
+            zIndex: 9999
+        }));
+    }
+});
+
+onBeforeUnmount(() => {
+    tippyInstances.forEach(instance => {
+        if (instance) {
+            instance.destroy();
+        }
+    });
+});
+</script>
 
 <style scoped>
 .buttons {
@@ -43,6 +98,12 @@ const { isFullscreen } = storeToRefs(timerStore)
     transform: none;
 }
 
+.button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .button-icons {
     height: 32px;
     width: auto;
@@ -53,7 +114,26 @@ const { isFullscreen } = storeToRefs(timerStore)
 .button-icons:hover {
     background-color: var(--color-background-soft);
     transform: scale(1.05);
-
     cursor: pointer;
+}
+</style>
+
+<style>
+/* Custom tippy theme for timer controls */
+.tippy-box[data-theme~='custom'] {
+    background-color: #333;
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tippy-box[data-theme~='custom'] .tippy-arrow {
+    color: #333;
+}
+
+.tippy-box[data-theme~='custom'] .tippy-content {
+    padding: 0;
 }
 </style>

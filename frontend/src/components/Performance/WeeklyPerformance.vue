@@ -80,7 +80,7 @@ const weeklyData = computed(() => {
 
 const getBarHeight = (count: number) => {
     const maxCount = Math.max(...weeklyData.value.map(day => day.count));
-    if (maxCount === 0) return 0;
+    if (maxCount === 0) return 10;
     return Math.max((count / maxCount) * 100, 10);
 };
 

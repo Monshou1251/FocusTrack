@@ -9,13 +9,15 @@
                 <RestButton :iconRight="mdiMenuDown" :withFilling="false" title="Rest" />
             </div>
             <div class="panels-right">
-                <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md" />
+                <ButtonOne :iconPath="mdiArrowExpand" @clickEvent="toggleFullscreen" size="md"
+                    tooltip="Enter fullscreen" />
             </div>
         </div>
 
         <!-- Fullscreen exit button - visible only in fullscreen mode -->
         <div v-show="isFullscreen" class="fullscreen-exit">
-            <ButtonOne :iconPath="mdiArrowCollapse" @clickEvent="toggleFullscreen" size="md" class="exit-button" />
+            <ButtonOne :iconPath="mdiArrowCollapse" @clickEvent="toggleFullscreen" size="md" class="exit-button"
+                tooltip="Exit fullscreen" />
         </div>
 
         <div class="timer">
@@ -293,6 +295,4 @@ function hexToRgba(hex: string, alpha: number): string {
 .timer-controls-container.fullscreen-controls:hover {
     opacity: 1;
 }
-
-/* Remove old rest-timer and rest-signal styles */
 </style>

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import (
+    get_category_repository,
     get_google_provider,
     get_log_publisher,
     get_oauth_account_repository,
@@ -18,6 +19,7 @@ from app.domain.exceptions.auth_exceptions import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
 )
+from app.domain.interfaces.category_repository import ICategoryRepository
 from app.domain.interfaces.log_publisher import LogPublisher
 from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
 from app.domain.interfaces.oauth_provider import OAuthProvider
@@ -28,6 +30,9 @@ from app.domain.services.auth_service import (
     authenticate_oauth_user,
     authenticate_user,
     register_user,
+)
+from app.domain.services.category_service import (
+    create_category_service,
 )
 from app.schemas.auth import EmailLoginForm, EmailRegisterForm
 from app.schemas.user import UserOut
@@ -42,17 +47,29 @@ async def register(
     user_repo: UserRepository = Depends(get_user_repository),
     hasher: PasswordHasher = Depends(get_password_hasher),
     log_publisher: LogPublisher = Depends(get_log_publisher),
+    category_repo: ICategoryRepository = Depends(get_category_repository),
 ) -> JSONResponse:
     client_ip = request.client.host if request and request.client else "unknown"
 
     try:
-        await register_user(
+        user = await register_user(
             form_data=form_data,
             user_repo=user_repo,
             hasher=hasher,
             client_ip=client_ip,
             log_publisher=log_publisher,
         )
+
+        default_categories = ["Work", "Personal", "Hobbies"]
+        for name in default_categories:
+            await create_category_service(
+                category_repo=category_repo,
+                user_id=user.id.value,
+                email=user.email.value,
+                client_ip=client_ip,
+                log_publisher=log_publisher,
+                name=name,
+            )
         return success_response("User registered successfully")
 
     except EmailAlreadyRegisteredError as e:

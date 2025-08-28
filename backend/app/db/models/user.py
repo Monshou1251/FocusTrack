@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.db.models.category import Category
+    from app.db.models.journal import JournalEntry
     from app.db.models.sprint import Sprint
 
 
@@ -35,6 +36,9 @@ class User(Base):
     )
     sprints: Mapped[list[Sprint]] = relationship(
         "Sprint", back_populates="user", cascade="all, delete-orphan"
+    )
+    journal_entries: Mapped[list[JournalEntry]] = relationship(
+        "JournalEntry", back_populates="user", cascade="all, delete-orphan"
     )
 
 

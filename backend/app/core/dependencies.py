@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security.hash_data import BcryptHasher, JWTTokenService
 from app.db.session import get_db
 from app.domain.interfaces.category_repository import ICategoryRepository
+from app.domain.interfaces.journal_repository import IJournalRepository
 from app.domain.interfaces.log_publisher import LogPublisher
 from app.domain.interfaces.oauth_account_repository import OAuthAccountRepository
 from app.domain.interfaces.oauth_provider import OAuthProvider
@@ -19,6 +20,9 @@ from app.infrastructure.messaging.rabbitmq.rabbitmq_publisher import (
 from app.infrastructure.oauth_providers.google_provider import GoogleOAuthProvider
 from app.infrastructure.repositories.sqla_category_provider import (
     SQLAlchemyCategoryRepository,
+)
+from app.infrastructure.repositories.sqla_journal_provider import (
+    SQLAlchemyJournalRepository,
 )
 from app.infrastructure.repositories.sqla_sprint_provider import (
     SQLAlchemySprintRepository,
@@ -66,3 +70,9 @@ def get_category_repository(
     session: AsyncSession = Depends(get_db),
 ) -> ICategoryRepository:
     return SQLAlchemyCategoryRepository(session)
+
+
+def get_journal_repository(
+    session: AsyncSession = Depends(get_db),
+) -> IJournalRepository:
+    return SQLAlchemyJournalRepository(session)

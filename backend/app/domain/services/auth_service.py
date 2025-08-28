@@ -47,8 +47,12 @@ async def register_user(
             raise EmailAlreadyRegisteredError(error_message)
 
         hashed_password = hasher.hash(password)
-        await user_repo.create_user(email, hashed_password, auth_provider="email")
+        user = await user_repo.create_user(
+            email, hashed_password, auth_provider="email"
+        )
         success = True
+
+        return user
 
     finally:
         asyncio.create_task(

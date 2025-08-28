@@ -154,3 +154,39 @@ class DeleteCategoryAttemptLog(CategoryEventLog):
 class UpdateCategoryAttemptLog(CategoryEventLog):
     def __init__(self, **kwargs):
         super().__init__(event="update_category_attempt", **kwargs)
+
+
+class JournalEventLog(LogEvent):
+    def __init__(
+        self,
+        *,
+        event: str,
+        user_id: int,
+        email: str,
+        success: bool,
+        entry_id: int | None = None,
+        ip: str = "",
+        error: str | None = None,
+        **extra,
+    ):
+        self.event = event
+        self.user_id = user_id
+        self.email = email
+        self.success = success
+        self.entry_id = entry_id
+        self.ip = ip
+        self.error = error
+        self.extra = extra
+
+    def to_dict(self) -> dict:
+        base = {
+            "event": self.event,
+            "user_id": self.user_id,
+            "email": self.email,
+            "success": self.success,
+            "entry_id": self.entry_id,
+            "ip": self.ip,
+            "error": self.error,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        return {**base, **self.extra}
