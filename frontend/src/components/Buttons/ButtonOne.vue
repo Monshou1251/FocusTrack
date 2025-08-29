@@ -8,7 +8,7 @@
 import SvgIcon from '@jamescoyle/vue-icon';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     iconPath: { type: String, required: true },
@@ -43,6 +43,12 @@ onMounted(() => {
         });
     }
 });
+
+watch(() => props.tooltip, (newVal) => {
+    if (tippyInstance) {
+        tippyInstance.setContent(newVal)
+    }
+})
 
 onBeforeUnmount(() => {
     if (tippyInstance) {

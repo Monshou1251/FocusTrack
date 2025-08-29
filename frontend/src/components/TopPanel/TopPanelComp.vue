@@ -4,8 +4,8 @@
             {{ title }}
         </div>
         <div class="exit-button" v-show="showButton">
-            <ButtonOne :iconPath="mdiHelp" size="xs" variant="secondary" tooltip="Enter fullscreen"
-                @clickEvent="$emit('clickHelp')" />
+            <ButtonOne :iconPath="mdiHelp" size="xs" variant="secondary"
+                tooltip="The name of you activities. Maximum length " @clickEvent="$emit('clickHelp')" />
         </div>
     </div>
 </template>

@@ -26,8 +26,8 @@ class Sprint(Base):
         index=True,
     )
     category_id: Mapped[int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE"),
-        nullable=False,
+        ForeignKey("categories.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
     duration: Mapped[int] = mapped_column(nullable=False)

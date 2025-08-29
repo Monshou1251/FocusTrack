@@ -1,7 +1,18 @@
 <template>
   <div class="journal">
     <div class="header">
-      <h3>Journal</h3>
+      <div>
+
+        <!-- <button @click="toogleJournalFullscreen">test</button> -->
+        <div class="panels">
+          <h3>Journal</h3>
+          <div class="fs-button">
+
+            <ButtonOne :iconPath="mdiArrowExpand" @click="toogleJournalFullscreen" size="sm"
+              :tooltip="isJournalFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'" />
+          </div>
+        </div>
+      </div>
       <form class="create" @submit.prevent="onCreate">
         <input v-model="title" type="text" placeholder="Title" required />
         <textarea v-model="content" placeholder="What's on your mind?" rows="3" class="content-textarea" required />
@@ -51,12 +62,17 @@
 <script setup lang="ts">
 import { useJournalStore } from '@/store/journal'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiPlusBoxOutline } from '@mdi/js'
+import { mdiArrowExpand, mdiPlusBoxOutline } from '@mdi/js'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
+import ButtonOne from '../Buttons/ButtonOne.vue'
 
 const journal = useJournalStore()
-const { entries, isLoading } = storeToRefs(journal)
+const { toogleJournalFullscreen } = journal
+
+
+const { entries, isLoading, isJournalFullscreen } = storeToRefs(journal)
+
 
 const title = ref('')
 const content = ref('')
@@ -117,7 +133,6 @@ function closeDeleteModal() {
   flex-direction: column;
   height: 100%;
   min-width: 0;
-  /* Cyrillic-friendly system stack */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Noto Sans", "Ubuntu", "Cantarell", "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -126,8 +141,8 @@ function closeDeleteModal() {
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
+  /* padding-bottom: 8px; */
+  /* border-bottom: 1px solid var(--color-border); */
 }
 
 h3 {
@@ -138,8 +153,16 @@ h3 {
 
 .create {
   display: flex;
+  flex-direction: column;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+.panels {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 17px;
 }
 
 .create input {
@@ -148,11 +171,17 @@ h3 {
   border-radius: 6px;
   padding: 6px 8px;
   color: var(--color-text);
-  flex: 1 1 140px;
+  /* flex: 1 1 140px; */
   min-width: 0;
   font-family: inherit;
   font-size: 0.8rem;
   line-height: 1.4;
+  /* max-width: 40vw; */
+}
+
+.fs-button {
+  width: 22px;
+  height: 22px;
 }
 
 .content-textarea {
@@ -161,13 +190,14 @@ h3 {
   border-radius: 6px;
   padding: 6px 8px;
   color: var(--color-text);
-  flex: 1 1 100%;
+  /* flex: 1 1 100%; */
   min-width: 0;
   resize: vertical;
   font-family: inherit;
   font-size: 0.8rem;
   line-height: 1.5;
   overflow: auto;
+  /* max-width: 40vw; */
 }
 
 /* bottom action bar like categories */
@@ -180,14 +210,16 @@ h3 {
   padding: 8px 12px;
   border: 1px solid var(--color-border);
   background: var(--color-background);
-  color: var(--color-text);
+  color: var(--color-text-mute);
   border-radius: 8px;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
   margin-bottom: 8px;
+  /* max-width: 40vw; */
 }
 
 .primary-btn:hover:enabled {
+  color: var(--color-text);
   border-color: var(--color-border-hover);
   background: var(--color-background-soft);
 }
@@ -209,7 +241,7 @@ h3 {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--color-border);
-  gap: 10px;
+  gap: 6px;
 }
 
 /* Custom scrollbar for journal list */
@@ -262,10 +294,11 @@ h3 {
 }
 
 .item {
-  border: 1px dashed var(--color-border);
-  border-radius: 8px;
+  border-bottom: 1px dashed var(--color-border);
+
+  border-radius: 2px;
   padding: 8px;
-  background: var(--color-background-mute);
+  /* background: var(--color-background-mute); */
   margin-right: 4px;
 }
 

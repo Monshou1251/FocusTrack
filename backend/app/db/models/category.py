@@ -27,5 +27,5 @@ class Category(Base):
 
     user: Mapped[User] = relationship(back_populates="categories")
     sprints: Mapped[list[Sprint]] = relationship(
-        back_populates="category", cascade="all, delete-orphan"
+        back_populates="category", passive_deletes=True
     )
