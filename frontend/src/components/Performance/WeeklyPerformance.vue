@@ -60,12 +60,12 @@ const weeklyData = computed(() => {
         );
 
 
-        const totalMilliseconds = daySprints.reduce((total, sprint) => {
+        const totalSeconds = daySprints.reduce((total, sprint) => {
             return total + parseInt(sprint.duration);
         }, 0);
 
 
-        const totalMinutes = Math.round(totalMilliseconds / (1000 * 60));
+        const totalMinutes = Math.round(totalSeconds / 60);
 
         weekDays.push({
             dayName: dayNames[i],

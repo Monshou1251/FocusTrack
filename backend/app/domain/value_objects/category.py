@@ -15,6 +15,6 @@ class CategoryName(ValueObject):
     def __post_init__(self):
         super().__post_init__()
         cleaned = self.value.strip()
-        if not (3 <= len(cleaned) <= 18):
-            raise ValueError("Category length must be between 3 and 18 characters")
+        if not (3 <= len(cleaned) <= 28):
+            raise ValueError("Category length must be between 3 and 28 characters")
         object.__setattr__(self, "value", cleaned)

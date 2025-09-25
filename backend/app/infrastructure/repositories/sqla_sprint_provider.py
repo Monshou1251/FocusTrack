@@ -26,6 +26,8 @@ class SQLAlchemySprintRepository(ISprintRepository):
             started_at=started_at,
         )
 
+        print(started_at)
+
         self.session.add(sprint)
         await self.session.commit()
 

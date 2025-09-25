@@ -14,6 +14,8 @@ export const useSprintStore = defineStore('sprints', () => {
       error.value = null
       const response = await getSprintsApi()
       sprints.value = response.data.sprints
+      console.log('sprints')
+      console.log(sprints.value)
       isLoaded.value = true
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch sprints'

@@ -57,9 +57,9 @@ const segments = computed<Segment[]>(() => {
     const byCat: Record<string, number> = {}
 
     for (const s of todaySprints.value) {
-        const ms = parseInt(s.duration)
-        if (isNaN(ms)) continue
-        const minutes = Math.round(ms / (1000 * 60))
+        const seconds = parseInt(s.duration)
+        if (isNaN(seconds)) continue
+        const minutes = Math.round(seconds / 60)
         const categoryId = s.category_id
         if (!categoryId) continue
         byCat[categoryId] = (byCat[categoryId] || 0) + minutes
