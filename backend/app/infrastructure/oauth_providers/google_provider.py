@@ -1,5 +1,6 @@
 # app\infrastructure\repositories\google_provider.py
 
+
 import httpx
 
 from app.core.config import settings
@@ -9,13 +10,16 @@ from app.domain.interfaces.oauth_provider import OAuthProvider
 class GoogleOAuthProvider(OAuthProvider):
     name = "google"
 
-    async def exchange_code_for_token(self, code: str) -> dict:
+    async def exchange_code_for_token(self, code: str, redirect_uri: str | None = None) -> dict:
         token_url = "https://oauth2.googleapis.com/token"
+        # Используем переданный redirect_uri или дефолтный из настроек
+        redirect_uri_to_use = redirect_uri or settings.GOOGLE_REDIRECT_URI
+        
         data = {
             "code": code,
             "client_id": settings.CLIENT_ID,
             "client_secret": settings.CLIENT_SECRET,
-            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "redirect_uri": redirect_uri_to_use,
             "grant_type": "authorization_code",
         }
 

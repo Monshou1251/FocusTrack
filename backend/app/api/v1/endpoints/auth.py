@@ -1,8 +1,11 @@
+import logging
 from typing import Annotated
+from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Form, Query, Request, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 
+from app.core.config import settings
 from app.core.dependencies import (
     get_category_repository,
     get_google_provider,
@@ -12,6 +15,7 @@ from app.core.dependencies import (
     get_token_service,
     get_user_repository,
 )
+from app.core.rate_limiter import limiter
 from app.core.responses import error_response, success_response
 from app.core.security.user_security import get_current_user
 from app.domain.entities.user import User as UserEntity
@@ -38,9 +42,11 @@ from app.schemas.auth import EmailLoginForm, EmailRegisterForm
 from app.schemas.user import UserOut
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register")
+@limiter.limit("3/hour")
 async def register(
     request: Request,
     form_data: Annotated[EmailRegisterForm, Form()],
@@ -77,6 +83,7 @@ async def register(
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
     request: Request,
     form_data: Annotated[EmailLoginForm, Form()],
@@ -85,6 +92,9 @@ async def login(
     token_service: TokenService = Depends(get_token_service),
     log_publisher: LogPublisher = Depends(get_log_publisher),
 ) -> JSONResponse:
+    """
+    Basic auth with login and password
+    """
     client_ip = request.client.host if request and request.client else "unknown"
 
     try:
@@ -103,9 +113,9 @@ async def login(
             key="access_token",
             value=token_data["access_token"],
             httponly=True,
-            # secure=True,
+            secure=settings.secure_cookies,
             samesite="lax",
-            max_age=60 * 60 * 24 * 7,
+            max_age=settings.jwt_max_age_seconds,
         )
         return response
 
@@ -113,47 +123,101 @@ async def login(
         return error_response(str(e), status_code=401)
 
 
-@router.post("/google_auth")
-async def auth_google(
+@router.get("/google/init")
+async def google_init(
     request: Request,
-    payload: dict,
+    provider: OAuthProvider = Depends(get_google_provider),
+) -> RedirectResponse:
+    """
+    Initialize OAuth flow - redirect to Google OAuth page.
+    After successful authorization, Google redirects to /api/v1/auth/google/callback
+    """
+    # Use fixed redirect_uri from settings
+    callback_url = settings.GOOGLE_REDIRECT_URI
+
+    if settings.ENVIRONMENT == "development":
+        logger.debug(f"Google OAuth init - redirect_uri: {callback_url}")
+
+    # Google OAuth URL
+    google_oauth_url = "https://accounts.google.com/o/oauth2/v2/auth"
+    params = {
+        "client_id": settings.CLIENT_ID,
+        "redirect_uri": callback_url,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+
+    auth_url = f"{google_oauth_url}?{urlencode(params)}"
+    logger.info("Redirecting to Google OAuth")
+
+    return RedirectResponse(url=auth_url)
+
+
+@router.get("/google/callback")
+async def google_callback(
+    request: Request,
+    code: str = Query(...),
     token_service: TokenService = Depends(get_token_service),
     provider: OAuthProvider = Depends(get_google_provider),
     user_repo: UserRepository = Depends(get_user_repository),
     oauth_repo: OAuthAccountRepository = Depends(get_oauth_account_repository),
     log_publisher: LogPublisher = Depends(get_log_publisher),
-) -> JSONResponse:
+) -> RedirectResponse:
+    """
+    Google OAuth callback endpoint.
+    Exchanges authorization code for token, authenticates user, and redirects to SPA.
+    """
     client_ip = request.client.host if request and request.client else "unknown"
+
     try:
+        # Use the same redirect_uri as in initialization
+        callback_url = settings.GOOGLE_REDIRECT_URI
+
+        if settings.ENVIRONMENT == "development":
+            logger.debug(f"Google OAuth callback - redirect_uri: {callback_url}")
+        else:
+            logger.info("Google OAuth callback received")
+
         token_data = await authenticate_oauth_user(
-            payload["code"],
+            code,
             provider,
             token_service,
             user_repo,
             oauth_repo,
             client_ip,
             log_publisher,
+            redirect_uri=callback_url,
         )
 
-        response = success_response(
-            "Authenticated via OAuth", data={"user": token_data["user"]}
-        )
+        # Redirect to frontend after successful authentication
+        redirect_url = f"{settings.FRONTEND_URL}/main"
+
+        # Create redirect response with cookie
+        response = RedirectResponse(url=redirect_url)
         response.set_cookie(
             key="access_token",
             value=token_data["access_token"],
             httponly=True,
-            # secure=True,
+            secure=settings.secure_cookies,
             samesite="Lax",
-            max_age=60 * 60 * 24 * 7,
+            max_age=settings.jwt_max_age_seconds,
         )
 
         return response
+
     except InvalidCredentialsError:
-        return error_response("OAuth authentication failed", status_code=400)
+        # Redirect to login page with error
+        error_url = f"{settings.FRONTEND_URL}/login?error=oauth_failed"
+        return RedirectResponse(url=error_url)
 
 
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: UserEntity = Depends(get_current_user)) -> UserOut:
+    """
+    Endpoint to receive information about the user
+    """
     return UserOut(
         id=current_user.id.value,
         email=current_user.email.value,
@@ -164,5 +228,8 @@ async def get_me(current_user: UserEntity = Depends(get_current_user)) -> UserOu
 
 @router.post("/logout")
 def logout(response: Response):
+    """
+    Logout endpoint
+    """
     response.delete_cookie("access_token")
     return {"message": "Logged out"}

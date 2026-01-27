@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const rawBase = import.meta.env.VITE_API_URL ?? '/api'
-const baseURL = String(rawBase).replace(/\/$/, '')
+const baseURL = String(rawBase).replace(/\/$/, '').replace(/[\r\n]/g, '').trim()
 
 export const http = axios.create({
   baseURL,

@@ -31,7 +31,7 @@
               <svg-icon type="mdi" :path="mdiGoogle" @click="handleGoogleLogin"></svg-icon>
             </div>
             <div class="google-git-icons-item" title="Login with Github">
-              <svg-icon type="mdi" :path="mdiGithub"></svg-icon>
+              <svg-icon type="mdi" :path="mdiGithub" @click="()=> console.log('test github')"></svg-icon>
             </div>
           </div>
         </form>
@@ -50,7 +50,6 @@ import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/store/auth'
 import { mdiAt, mdiGithub, mdiGoogle, mdiKeyVariant } from '@mdi/js'
 import axios from 'axios'
-import { GoogleOAuthProvider } from 'google-oauth-gsi'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -152,40 +151,21 @@ const signUp = async () => {
 }
 
 
-const googleProvider = new GoogleOAuthProvider({
-  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  onScriptLoadError: () => console.log('onScriptLoadError'),
-  onScriptLoadSuccess: () => console.log('onScriptLoadSuccess'),
-});
-
-const handleGoogleLogin = googleProvider.useGoogleLogin({
-  flow: 'auth-code',
-  onSuccess: async (res) => {
-    console.log('Logged in with Google', res);
-    try {
-      isLoading.value = true
-      const response = await axios.post(`${BASE_URL}/auth/google_auth`, res);
-      const data = response.data
-
-      if (data.success) {
-        await authStore.fetchCurrentUser()
-        router.push('/main')
-      } else {
-        showError(data.error ?? data.message ?? "Login failed")
-      }
-      console.log('✅ Auth success:', response.data);
-    } catch (e) {
-      console.error('❌ Auth error:', e);
-      showError('Google auth failed.');
-    } finally {
-      isLoading.value = false
-    }
-  },
-  onError: (err) => {
-    console.error('❌ Failed to login with Google:', err);
-    showError('Error: Google auth failed.');
-  },
-});
+// Backend-only OAuth flow - используем redirect вместо popup
+// Это решает проблему с потерей JS-контекста в static SPA
+// Flow: Frontend -> Backend /google/init -> Google OAuth -> Backend /google/callback -> Frontend /main
+const handleGoogleLogin = () => {
+  console.log('🚀 Initiating Google OAuth via backend redirect...');
+  console.log('BASE_URL:', BASE_URL);
+  console.log('Redirect URL:', `${BASE_URL}/auth/google/init`);
+  isLoading.value = true;
+  
+  // Редиректим на backend endpoint, который инициирует OAuth flow
+  // Backend редиректит на Google, а после успешной авторизации Google редиректит обратно в backend callback
+  // Backend callback устанавливает cookie и редиректит в SPA на /main
+  // Используем window.location.replace для предотвращения возврата назад
+  window.location.replace(`${BASE_URL}/auth/google/init`);
+};
 
 
 document.addEventListener('mousemove', function (e) {

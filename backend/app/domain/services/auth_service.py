@@ -120,13 +120,14 @@ async def authenticate_oauth_user(
     oauth_repo: OAuthAccountRepository,
     client_ip: str,
     log_publisher: LogPublisher,
+    redirect_uri: str | None = None,
 ) -> dict:
     success = False
     error = None
     user_email = "unknown"
 
     try:
-        token_data = await oauth_provider.exchange_code_for_token(code)
+        token_data = await oauth_provider.exchange_code_for_token(code, redirect_uri=redirect_uri)
         access_token = token_data["access_token"]
         user_info = await oauth_provider.get_user_info(access_token)
         user_email = user_info.get("email", "unknown")

@@ -1,0 +1,192 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: focustrack_postgres
+    environment:
+      POSTGRES_USER: focustrack_user
+      POSTGRES_PASSWORD: focustrack_password
+      POSTGRES_DB: focustrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U focustrack_user -d focustrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Ограничение размера логов
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: focustrack_rabbitmq
+    ports:
+      - "5672:5672"     # AMQP port
+      - "15672:15672"   # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    mem_limit: 512m
+    mem_reservation: 256m
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Ограничение размера логов
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: focustrack_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://focustrack_user:focustrack_password@postgres:5432/focustrack
+      SECRET_KEY: local-dev-secret-key-change-in-production
+      ACCESS_TOKEN_EXPIRE_MINUTES: 120
+      ALGORITHM: HS256
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USERNAME: ${EMAIL_USERNAME:-your-email@gmail.com}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-your-app-password}
+      EMAIL_FROM: ${EMAIL_FROM:-your-email@gmail.com}
+      # CLIENT_ID, CLIENT_SECRET берутся из ./backend/.env через env_file
+      # GOOGLE_REDIRECT_URI переопределяем для Docker режима (backend callback через nginx)
+      # Для локальной разработки используется значение из .env (http://localhost:8000/api/v1/auth/google/callback)
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost/api/v1/auth/google/callback}
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      RABBITMQ_LOG_QUEUE: log_queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - backend_logs:/app/fallback_logs
+    restart: unless-stopped
+    # Ограничение размера логов для предотвращения заполнения диска
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"      # Максимальный размер одного лог-файла
+        max-file: "3"         # Максимальное количество лог-файлов (итого ~30MB)
+
+  # Frontend - Vite Dev Server (для разработки и тестирования)
+  # Используется вместо static build для решения проблем с OAuth и JS-контекстом
+  # Для production используйте target: production и nginx для статики
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+      args:
+        VITE_API_URL: /api/v1
+    container_name: focustrack_frontend
+    env_file:
+      - ./frontend/.env
+    environment:
+      # В Docker используем имя сервиса backend
+      VITE_BACKEND_URL: http://backend:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      # Монтируем исходники для hot-reload
+      - ./frontend:/app
+      - /app/node_modules  # Исключаем node_modules из монтирования
+    restart: unless-stopped
+    # Ограничение размера логов
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx - reverse proxy для API и проксирование на Vite Dev Server
+  nginx:
+    image: nginx:alpine
+    container_name: focustrack_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    # Ограничение размера логов
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Log Consumer Worker
+  # worker:
+  #   build:
+  #     context: ./workers/log_consumer
+  #     dockerfile: Dockerfile
+  #   container_name: focustrack_worker
+  #   environment:
+  #     RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+  #     RABBITMQ_LOG_QUEUE: log_queue
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   volumes:
+  #     - worker_logs:/app/logs
+  #   restart: unless-stopped
+
+volumes:
+  # Named volumes хранятся на диске C: по умолчанию в Docker Desktop на Windows
+  # Для изменения расположения: Docker Desktop -> Settings -> Resources -> Advanced
+  postgres_data:
+  rabbitmq_data:
+  backend_logs:      # Логи backend (ограничены через logging.max-size)
+  worker_logs:
+  # frontend_dist:  # Не используется при Vite Dev Server (используется для production static build)
+
+# ============================================================================
+# Команды для очистки и мониторинга:
+# ============================================================================
+# Просмотр использования диска:
+#   docker system df -v
+#
+# Очистка неиспользуемых ресурсов (безопасно):
+#   docker system prune                    # Контейнеры, сети, образы без тегов
+#   docker volume prune                    # Неиспользуемые volumes
+#   docker image prune -a                  # Все неиспользуемые образы
+#   docker builder prune -a                # Build cache
+#
+# Полная очистка (ОСТОРОЖНО - удалит ВСЁ):
+#   docker system prune -a --volumes
+#
+# Очистка конкретных volumes (если нужно):
+#   docker volume rm focustrack_postgres_data
+#   docker volume rm focustrack_rabbitmq_data
+#   docker volume rm focustrack_backend_logs
+# ============================================================================
+

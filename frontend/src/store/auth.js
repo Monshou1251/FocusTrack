@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useSprintStore } from './sprints'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
+const API_BASE = String(import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/[\r\n]/g, '').trim()
 
 export const useAuthStore = defineStore('auth', () => {
   const username = ref(null)
