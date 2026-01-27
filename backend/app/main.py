@@ -5,11 +5,16 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.api.v1.endpoints import auth, category, focus, journal
 from app.core.rate_limiter import limiter
 
 app = FastAPI()
+
+# Trust proxy headers (X-Forwarded-Proto, X-Forwarded-For)
+# Это нужно чтобы FastAPI знал что работает за HTTPS прокси
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 # Configure rate limiter FIRST
 app.state.limiter = limiter
