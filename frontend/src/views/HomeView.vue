@@ -5,14 +5,22 @@
       <div class="left-section">
         <h1 class="app-title">FocusTrack</h1>
         <p class="app-description">
-          <span v-for="(char, index) in 'Your personal focus timer for maximum productivity'" :key="index" class="char"
-            :style="{ animationDelay: `${1.5 + index * 0.05}s` }">
+          <span
+            v-for="(char, index) in 'Your personal focus timer for maximum productivity'"
+            :key="index"
+            class="char"
+            :style="{ animationDelay: `${1.5 + index * 0.05}s` }"
+          >
             {{ char === ' ' ? '\u00A0' : char }}
           </span>
         </p>
         <p class="app-tagline">
-          <span v-for="(char, index) in 'Stay focused'" :key="index" class="char highlight"
-            :style="{ animationDelay: `${2 + index * 0.05}s` }">
+          <span
+            v-for="(char, index) in 'Stay focused'"
+            :key="index"
+            class="char highlight"
+            :style="{ animationDelay: `${2 + index * 0.05}s` }"
+          >
             {{ char === ' ' ? '\u00A0' : char }}
           </span>
         </p>
@@ -22,19 +30,29 @@
       <div class="right-section">
         <div class="arrow-container" @click="goToLogin">
           <div class="arrow-circle">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <defs>
                 <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:var(--color-warm-yellow)" />
-                  <stop offset="20%" style="stop-color:var(--color-coral-red)" />
-                  <stop offset="40%" style="stop-color:var(--color-sky-blue)" />
-                  <stop offset="60%" style="stop-color:var(--color-mint-green)" />
-                  <stop offset="80%" style="stop-color:var(--color-soft-purple)" />
-                  <stop offset="100%" style="stop-color:var(--color-light-pink)" />
+                  <stop offset="0%" style="stop-color: var(--color-warm-yellow)" />
+                  <stop offset="20%" style="stop-color: var(--color-coral-red)" />
+                  <stop offset="40%" style="stop-color: var(--color-sky-blue)" />
+                  <stop offset="60%" style="stop-color: var(--color-mint-green)" />
+                  <stop offset="80%" style="stop-color: var(--color-soft-purple)" />
+                  <stop offset="100%" style="stop-color: var(--color-light-pink)" />
                 </linearGradient>
               </defs>
-              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="url(#arrowGradient)" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M5 12H19M19 12L12 5M19 12L12 19"
+                stroke="url(#arrowGradient)"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
         </div>
@@ -55,7 +73,7 @@ const goToLogin = async () => {
 
   // Ждем завершения анимации исчезновения
   // await new Promise(resolve => setTimeout(resolve, 500))
-  await new Promise(resolve => setTimeout(resolve, 500))
+  await new Promise((resolve) => setTimeout(resolve, 500))
 
   // Переходим на страницу логина
   router.push('/login')
@@ -65,7 +83,7 @@ const goToLogin = async () => {
 <style scoped>
 .landing-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-background) -50%, var(--color-background-mute) 100%);
+  /* background: linear-gradient(135deg, var(--color-background) -50%, var(--color-background-mute) 100%); */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,13 +113,14 @@ const goToLogin = async () => {
   margin: 0;
   line-height: 1;
   margin-bottom: 30px;
-  animation: titleGlow 5s ease-in-out infinite, slideInFromTop 1.5s ease-out forwards;
+  animation:
+    titleGlow 5s ease-in-out infinite,
+    slideInFromTop 1.5s ease-out forwards;
   opacity: 0;
   transform: translateY(-100px);
 }
 
 @keyframes titleGlow {
-
   0%,
   100% {
     text-shadow: 0 0 20px rgba(255, 205, 75, 0.3);
@@ -224,8 +243,6 @@ const goToLogin = async () => {
   transform: translateX(3px);
 }
 
-
-
 .arrow-circle {
   width: 120px;
   height: 120px;
@@ -242,16 +259,12 @@ const goToLogin = async () => {
   transform: scale(0.5);
 }
 
-
-
 .arrow-icon {
   width: 48px;
   height: 48px;
   transition: all 0.3s ease;
   animation: gradientShift 2s linear infinite;
 }
-
-
 
 /* Анимация для градиента */
 @keyframes gradientShift {
@@ -263,8 +276,6 @@ const goToLogin = async () => {
     filter: hue-rotate(360deg);
   }
 }
-
-
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -285,7 +296,6 @@ const goToLogin = async () => {
   .arrow-circle {
     width: 100px;
     height: 100px;
-
   }
 
   .arrow-icon {
