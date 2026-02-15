@@ -82,7 +82,7 @@ const goToLogin = async () => {
 
 <style scoped>
 .landing-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   /* background: linear-gradient(135deg, var(--color-background) -50%, var(--color-background-mute) 100%); */
   display: flex;
   align-items: center;
