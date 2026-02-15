@@ -202,7 +202,7 @@ onMounted(() => {
   }
 
   .right-block {
-    /* margin-left: auto; */
+    margin-left: auto;
     padding-right: 12px;
     gap: 12px;
   }
