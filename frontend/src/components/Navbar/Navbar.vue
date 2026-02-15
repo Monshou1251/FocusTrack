@@ -46,6 +46,8 @@ const isAuthenticated = authStore.isAuthenticated
 const applyTheme = (dark) => {
   document.documentElement.classList.toggle('dark-mode', dark)
   document.documentElement.classList.toggle('light-mode', !dark)
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', dark ? '#181818' : '#ffffff')
 }
 
 const toggleColorMode = () => {

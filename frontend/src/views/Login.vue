@@ -11,14 +11,33 @@
           <div>
             <div class="form-group">
               <svg-icon class="input-icons" v-if="!email" type="mdi" :path="mdiAt"></svg-icon>
-              <input type="email" name="email" v-model="email" @input="clearErrors" class="form-control"
-                :class="{ 'error': emailError }" placeholder="email" />
+              <input
+                type="email"
+                name="email"
+                v-model="email"
+                @input="clearErrors"
+                class="form-control"
+                :class="{ error: emailError }"
+                placeholder="email"
+              />
               <div v-if="emailError" class="error-message">{{ emailError }}</div>
             </div>
             <div class="form-group">
-              <svg-icon class="input-icons" v-if="!password" type="mdi" :path="mdiKeyVariant"></svg-icon>
-              <input type="password" name="password" v-model="password" @input="clearErrors" class="form-control"
-                :class="{ 'error': passwordError }" placeholder="password" />
+              <svg-icon
+                class="input-icons"
+                v-if="!password"
+                type="mdi"
+                :path="mdiKeyVariant"
+              ></svg-icon>
+              <input
+                type="password"
+                name="password"
+                v-model="password"
+                @input="clearErrors"
+                class="form-control"
+                :class="{ error: passwordError }"
+                placeholder="password"
+              />
               <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
             </div>
           </div>
@@ -31,7 +50,11 @@
               <svg-icon type="mdi" :path="mdiGoogle" @click="handleGoogleLogin"></svg-icon>
             </div>
             <div class="google-git-icons-item" title="Login with Github">
-              <svg-icon type="mdi" :path="mdiGithub" @click="()=> console.log('test github')"></svg-icon>
+              <svg-icon
+                type="mdi"
+                :path="mdiGithub"
+                @click="() => console.log('test github')"
+              ></svg-icon>
             </div>
           </div>
         </form>
@@ -53,25 +76,23 @@ import axios from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-
 const authStore = useAuthStore()
 const { showSuccess, showError } = useToast()
 
-const router = useRouter();
+const router = useRouter()
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-
-const email = ref("")
-const password = ref("")
+const email = ref('')
+const password = ref('')
 
 const isLoading = ref(false)
-const emailError = ref("")
-const passwordError = ref("")
+const emailError = ref('')
+const passwordError = ref('')
 
 const clearErrors = () => {
-  emailError.value = ""
-  passwordError.value = ""
+  emailError.value = ''
+  passwordError.value = ''
 }
 
 const signIn = async () => {
@@ -80,11 +101,11 @@ const signIn = async () => {
 
   // Validate fields
   if (!email.value.trim()) {
-    emailError.value = "Email is required"
+    emailError.value = 'Email is required'
     return
   }
   if (!password.value.trim()) {
-    passwordError.value = "Password is required"
+    passwordError.value = 'Password is required'
     return
   }
 
@@ -102,27 +123,25 @@ const signIn = async () => {
         await authStore.fetchCurrentUser()
         router.push('/main')
       } catch (e) {
-        console.error("❌ fetchCurrentUser failed:", e)
-        showError("Ошибка при получении данных пользователя")
+        console.error('❌ fetchCurrentUser failed:', e)
+        showError('Ошибка при получении данных пользователя')
       }
     } else {
-      showError(data.error ?? data.message ?? "Login failed")
+      showError(data.error ?? data.message ?? 'Login failed')
     }
-
   } catch (error) {
     const errData = error.response?.data
-    const errMsg = errData?.message ?? "Login failed"
+    const errMsg = errData?.message ?? 'Login failed'
     showError(errMsg)
   } finally {
     isLoading.value = false
   }
 }
 
-
 const signUp = async () => {
   isLoading.value = true
   if (!email.value.trim() || !password.value.trim()) {
-    showError("Please enter both email and password.")
+    showError('Please enter both email and password.')
     return
   }
   try {
@@ -134,39 +153,36 @@ const signUp = async () => {
     const data = response.data
 
     if (data.success) {
-      showSuccess("Successfully registered!")
+      showSuccess('Successfully registered!')
     } else {
-      showError(data.error ?? "Registration failed")
+      showError(data.error ?? 'Registration failed')
     }
-
   } catch (error) {
     console.log(error)
     const errData = error?.response?.data
-    const errMsg = errData?.message ?? "Registration failed"
+    const errMsg = errData?.message ?? 'Registration failed'
     showError(errMsg)
-    console.error("Registration error:", error)
+    console.error('Registration error:', error)
   } finally {
     isLoading.value = false
   }
 }
 
-
 // Backend-only OAuth flow - используем redirect вместо popup
 // Это решает проблему с потерей JS-контекста в static SPA
 // Flow: Frontend -> Backend /google/init -> Google OAuth -> Backend /google/callback -> Frontend /main
 const handleGoogleLogin = () => {
-  console.log('🚀 Initiating Google OAuth via backend redirect...');
-  console.log('BASE_URL:', BASE_URL);
-  console.log('Redirect URL:', `${BASE_URL}/auth/google/init`);
-  isLoading.value = true;
-  
+  console.log('🚀 Initiating Google OAuth via backend redirect...')
+  console.log('BASE_URL:', BASE_URL)
+  console.log('Redirect URL:', `${BASE_URL}/auth/google/init`)
+  isLoading.value = true
+
   // Редиректим на backend endpoint, который инициирует OAuth flow
   // Backend редиректит на Google, а после успешной авторизации Google редиректит обратно в backend callback
   // Backend callback устанавливает cookie и редиректит в SPA на /main
   // Используем window.location.replace для предотвращения возврата назад
-  window.location.replace(`${BASE_URL}/auth/google/init`);
-};
-
+  window.location.replace(`${BASE_URL}/auth/google/init`)
+}
 
 document.addEventListener('mousemove', function (e) {
   const gradientText = document.querySelector('.text')
@@ -207,13 +223,15 @@ document.addEventListener('mousemove', function (e) {
   font-weight: 800;
   font-family: 'Bruno_Ace';
 
-  background-image: linear-gradient(to right,
-      var(--color-warm-yellow),
-      var(--color-coral-red),
-      var(--color-sky-blue),
-      var(--color-mint-green),
-      var(--color-soft-purple),
-      var(--color-light-pink));
+  background-image: linear-gradient(
+    to right,
+    var(--color-warm-yellow),
+    var(--color-coral-red),
+    var(--color-sky-blue),
+    var(--color-mint-green),
+    var(--color-soft-purple),
+    var(--color-light-pink)
+  );
   color: transparent;
   background-clip: text;
 }
@@ -239,7 +257,6 @@ document.addEventListener('mousemove', function (e) {
   font-size: 18px;
   box-shadow: none;
 }
-
 
 input {
   border-style: solid;
@@ -305,7 +322,7 @@ input:-webkit-autofill {
   color: transparent;
 }
 
-.form-group:not(:placeholder-shown):focus+svg {
+.form-group:not(:placeholder-shown):focus + svg {
   display: none;
 }
 
@@ -362,13 +379,14 @@ button:hover {
   width: 40px;
   height: 40px;
   opacity: 0.4;
-
 }
 
 .google-git-icons-item:hover {
   background-color: var(--color-background-mute);
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
   opacity: 1;
 }
 
@@ -377,6 +395,22 @@ button:hover {
   border-radius: 10%;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding-bottom: 40px;
+  }
+
+  .container-wrapper {
+    width: 100%;
+    padding: 60px;
+    box-sizing: border-box;
+  }
+
+  .form-control {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 
 @keyframes fadeIn {
   from {
@@ -410,5 +444,4 @@ button:hover {
     font-weight: 600;
   }
 }
-
 </style>
