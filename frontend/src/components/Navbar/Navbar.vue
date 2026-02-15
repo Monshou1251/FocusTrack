@@ -5,7 +5,6 @@
     </div>
 
     <div class="right-block">
-
       <div class="toggle-container" @click="toggleColorMode">
         <div class="toggle">
           <div class="toggle-inner">
@@ -22,15 +21,14 @@
   </nav>
 </template>
 
-
 <script setup>
-import { useAuthStore } from '@/store/auth';
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiPowerStandby } from '@mdi/js';
-import { onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth'
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiPowerStandby } from '@mdi/js'
+import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-import ProfileInfo from './ProfileInfo.vue';
+import ProfileInfo from './ProfileInfo.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -40,13 +38,10 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-const isDarkMode = ref(
-  localStorage.getItem('isDarkMode') === 'true' || false
-)
+const isDarkMode = ref(localStorage.getItem('isDarkMode') === 'true' || false)
 
 // const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAuthenticated = authStore.isAuthenticated
-
 
 const applyTheme = (dark) => {
   document.documentElement.classList.toggle('dark-mode', dark)
@@ -57,9 +52,6 @@ const toggleColorMode = () => {
   isDarkMode.value = !isDarkMode.value
 }
 
-
-
-
 watch(isDarkMode, (newVal) => {
   localStorage.setItem('isDarkMode', String(newVal))
   applyTheme(newVal)
@@ -68,7 +60,6 @@ watch(isDarkMode, (newVal) => {
 onMounted(() => {
   applyTheme(isDarkMode.value)
 })
-
 </script>
 
 <style scoped>
@@ -100,8 +91,6 @@ onMounted(() => {
   border-right: 1px solid var(--color-border);
 }
 
-
-
 .right-block {
   display: flex;
   align-items: center;
@@ -132,14 +121,15 @@ onMounted(() => {
   background-color: var(--color-background-mute);
   width: 40px;
   height: 40px;
-  transition: border 0.2s ease, background-color 0.2s ease;
+  transition:
+    border 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .exit-button:hover {
   border: 1px solid var(--color-border-hover);
   cursor: pointer;
 }
-
 
 .toggle {
   width: 40px;
@@ -174,7 +164,6 @@ onMounted(() => {
 
 .toggle-container span {
   transition: color 0.3s ease-in-out;
-
 }
 
 .icon {
@@ -193,5 +182,33 @@ onMounted(() => {
 .icon.fa-sun {
   color: #ffcd4b;
   padding-right: 1px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 60px;
+  }
+
+  .left-panel {
+    min-width: unset;
+    padding: 0 12px;
+    flex: none;
+    width: auto;
+    overflow: hidden;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .right-block {
+    /* margin-left: auto; */
+    padding-right: 12px;
+    gap: 12px;
+  }
+
+  .color_scheme {
+    display: none;
+  }
 }
 </style>

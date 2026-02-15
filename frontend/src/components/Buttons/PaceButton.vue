@@ -162,6 +162,10 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
     height: 1.2em;
 }
 
+.button-title {
+    font-size: 14px;
+}
+
 .right {
     width: 18px;
     height: 18px;

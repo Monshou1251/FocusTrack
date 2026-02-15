@@ -215,4 +215,44 @@ onMounted(async () => {
 .calendar.journalfullscreen {
   display: none;
 }
+
+@media (max-width: 768px) {
+  .layout {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .content {
+    grid-template-areas:
+      "main"
+      "daily"
+      "performance"
+      "categories"
+      "journal"
+      "calendar";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    padding: 0.5rem;
+    margin-top: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .cell {
+    height: auto;
+    min-height: 200px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .main-content {
+    min-height: 70dvh;
+  }
+
+  .journal {
+    min-height: 300px;
+  }
+}
 </style>
